@@ -1,0 +1,48 @@
+terraform-aws-simple-example (Licensed Product) and all its components are protected by 
+copyright, and are distributed under the following terms.  
+  
+terraform-aws-simple-example, developed and copyrighted by Green River IT Incorporated 
+(Green River IT) is intended to serve as a working example of the foundation of a 
+software-defined data center, capable of creating, updating, and deleting cloud 
+resources.    
+  
+Since terraform-aws-simple-example is open source and free of licensing fees, you are 
+free to use, modify, and distribute the source code, as long as you include this 
+copyright statement.  
+  
+In particular, you can use terraform-aws-simple-example to 
+build proprietary software and are under no obligation to redistribute any of your 
+source code that is built using terraform-aws-simple-example.  Note however, that you 
+may not do anything to the terraform-aws-simple-example code, such as copyrighting it 
+yourself or claiming authorship of terraform-aws-simple-example, that will prevent 
+terraform-aws-simple-example from being distributed freely using an open source 
+development model.  
+  
+Warranty  
+  
+LICENSED PRODUCT IS PROVIDED AS IS WITH NO WARRANTIES OF ANY KIND
+INCLUDING THE WARRANTIES OF DESIGN, MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE, NON-INFRINGEMENT, OR ARISING FROM A COURSE OF
+DEALING, USAGE OR TRADE PRACTICE.  
+  
+Support  
+  
+LICENSED PRODUCT IS PROVIDED WITH NO SUPPORT AND WITHOUT ANY
+OBLIGATION ON THE PART OF GREEN RIVER IT OR ANY OF ITS SUBSIDIARIES 
+OR AFFILIATES TO ASSIST IN ITS USE, CORRECTION, MODIFICATION OR ENHANCEMENT.  
+  
+Support may be available from Green River IT to users who have agreed to a
+support contract.  
+  
+Liability  
+  
+GREEN RIVER IT OR ANY OF ITS SUBSIDIARIES OR AFFILIATES SHALL HAVE NO LIABILITY
+WITH RESPECT TO THE INFRINGEMENT OF COPYRIGHTS, TRADE SECRETS OR ANY
+PATENTS BY LICENSED PRODUCT OR ANY PART THEREOF.  
+  
+IN NO EVENT WILL GREEN RIVER IT OR ANY OF ITS SUBSIDIARIES OR AFFILIATES BE
+LIABLE FOR ANY LOST REVENUE OR PROFITS OR OTHER SPECIAL, INDIRECT AND
+CONSEQUENTIAL DAMAGES, EVEN IF GREEN RIVER IT HAS BEEN ADVISED OF THE 
+POSSIBILITY OF SUCH DAMAGES.  
+  
+terraform-aws-simple-example copyright Green River IT. Placerville CA USA, 2019.  
