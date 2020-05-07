@@ -24,4 +24,10 @@ steps:
     ls -al
     echo About to list contents of drop location:
     ls -al $(Build.ArtifactStagingDirectory)
+    echo About to copy the artifact elements to the drop location:
+    mv LICENSE.txt $(Build.ArtifactStagingDirectory)
+    mv calls-to-modules $(Build.ArtifactStagingDirectory)
+    mv modules $(Build.ArtifactStagingDirectory)
+    echo About to list contents of Artifact Staging Directory
+    ls -al $(Build.ArtifactStagingDirectory)
   displayName: 'Run a multi-line script'
