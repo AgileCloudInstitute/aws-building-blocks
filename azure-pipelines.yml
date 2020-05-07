@@ -9,12 +9,6 @@ pool:
 
 steps:
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
-
 - script: |
     echo About to list all contents of current directory:
     ls -al
@@ -27,3 +21,9 @@ steps:
     echo About to list contents of Artifact Staging Directory
     ls -al $(Build.ArtifactStagingDirectory)
   displayName: 'Run a multi-line script'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
