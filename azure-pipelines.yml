@@ -22,4 +22,6 @@ steps:
     echo See https://aka.ms/yaml
     echo About to list all contents of current directory:
     ls -al
+    echo About to list contents of drop location:
+    ls -al $(Build.ArtifactStagingDirectory)
   displayName: 'Run a multi-line script'
