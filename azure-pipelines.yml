@@ -1,7 +1,5 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# Example Pipeline Build Script that does a simple copy to an artifact directory
+# You can add much more complex scripts yourself later once you get this working
 
 trigger:
 - master
@@ -18,8 +16,6 @@ steps:
     publishLocation: 'Container'
 
 - script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
     echo About to list all contents of current directory:
     ls -al
     echo About to list contents of drop location:
