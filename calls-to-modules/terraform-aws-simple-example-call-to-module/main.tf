@@ -2,7 +2,8 @@
 ## Start at https://github.com/AgileCloudInstitute?tab=repositories    
 
 module "terraform-aws-simple-example" {
-  source = "..\\..\\modules\\terraform-aws-simple-example-module"
+  source = "../../modules/terraform-aws-simple-example-module"
+  #source = "..\\..\\modules\\terraform-aws-simple-example-module"
 
   _region = "us-west-2"
   access_key = "${var._public_access_key}"
