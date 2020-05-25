@@ -3,18 +3,18 @@
 
 import subprocess  
 import sys  
+import os  
   
 region=sys.argv[1]  
 print("region variable is: ")  
 print(region)  
 
-
 #'_public_access_key=$AWS_PUB'
 #'_secret_access_key=$AWS_SECRET'
 print("public key is: ")
-print($AWS_PUB)
+print(os.environ['AWS_PUB'])
 print("secret key is: ")
-print($AWS_SECRET)
+print(os.environ['AWS_SECRET'])
 #'aws_region=region'
 
 #path_to_input_vars="C:\\projects\\terraform-simple-aws-example\\vars\\VarsForTerraform\\"
