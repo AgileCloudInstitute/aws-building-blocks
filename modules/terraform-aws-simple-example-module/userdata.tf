@@ -14,6 +14,11 @@ yum -y update
 ##Put any other startup commands you want to put here.
 ##Remember there are other approaches such as configuration tools like Ansible, Chef, Puppet, etc.
 
+/usr/sbin/useradd testuser
+echo testuser:just-for-test123 | chpasswd
+sudo systemctl restart sshd
+rm -f /home/testuser/.ssh/authorized_keys
+
 USERDATA
 
 }
