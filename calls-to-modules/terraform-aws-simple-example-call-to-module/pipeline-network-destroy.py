@@ -22,6 +22,6 @@ print(os.environ['AWS_PUB'])
 print("secret key is: ")
 print(os.environ['AWS_SECRET'])
 
-destroyCommand="terraform apply -auto-approve -var 'aws_region="+region+"' -var 'path_to_ssh_keys="+path_to_ssh_keys+"' -var 'name_of_ssh_key="+name_of_ssh_key+"' -var '_public_access_key="+os.environ['AWS_PUB']+"' -var '_secret_access_key="+os.environ['AWS_SECRET']+"'"
+destroyCommand="terraform destroy -auto-approve -var 'aws_region="+region+"' -var 'path_to_ssh_keys="+path_to_ssh_keys+"' -var 'name_of_ssh_key="+name_of_ssh_key+"' -var '_public_access_key="+os.environ['AWS_PUB']+"' -var '_secret_access_key="+os.environ['AWS_SECRET']+"'"
 
 subprocess.run(destroyCommand, shell=True, check=True)
