@@ -9,6 +9,14 @@ region=sys.argv[1]
 print("region variable is: ")  
 print(region)  
 
+path_to_ssh_keys=sys.argv[2]
+print("path_to_ssh_keys is: ")
+print(path_to_ssh_keys)
+
+name_of_ssh_key=sys.argv[3]
+print("name_of_ssh_key is: ")
+print(name_of_ssh_key)
+
 print("public key is: ")
 print(os.environ['AWS_PUB'])
 print("secret key is: ")
