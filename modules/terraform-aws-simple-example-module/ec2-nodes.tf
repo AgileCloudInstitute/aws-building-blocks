@@ -29,12 +29,12 @@ resource "aws_instance" "example-host" {
   subnet_id = aws_subnet.example-host.id
   vpc_security_group_ids = [aws_security_group.example-hosts.id]
 
-  #connection {
-  #  type        = "ssh"
-  #  user        = "ec2-user"
-  #  private_key = file("${var.path_to_ssh_keys}${var.name_of_ssh_key}.pem")
-  #  host = self.public_ip
-  #}
+  connection {
+    type        = "ssh"
+    user        = "ec2-user"
+    private_key = file("${var.path_to_ssh_keys}${var.name_of_ssh_key}.pem")
+    host = self.public_ip
+  }
 
   timeouts {
     create = "60m"
