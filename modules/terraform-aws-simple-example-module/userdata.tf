@@ -16,8 +16,11 @@ yum -y update
 
 /usr/sbin/useradd testuser
 echo testuser:just-for-test123 | chpasswd
-sudo systemctl restart sshd
-rm -f /home/testuser/.ssh/authorized_keys
+
+sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
+
+systemctl restart sshd
+#rm -f /home/testuser/.ssh/authorized_keys
 
 USERDATA
 
