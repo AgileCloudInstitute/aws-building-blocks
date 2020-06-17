@@ -15,12 +15,15 @@ yum -y update
 ##Remember there are other approaches such as configuration tools like Ansible, Chef, Puppet, etc.
 
 #SECURITY HOLE: Just for easy testing, the following enables password login and creates a testuser with a password in version control. 
-#Remove the following 4 lines when you establish a secrets management system.
+#Remove the following lines when you establish a secrets management system.
 /usr/sbin/useradd testuser
 echo testuser:just-for-test123 | chpasswd
 sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
-systemctl restart sshd
-
+#Configure user to not require password to execute sudo commands.  
+cat << 'EOF' > /etc/sudoers.d/testuser
+testuser ALL=(ALL) NOPASSWD: ALL
+EOF  
+systemctl restart sshd  
 
 USERDATA
 
