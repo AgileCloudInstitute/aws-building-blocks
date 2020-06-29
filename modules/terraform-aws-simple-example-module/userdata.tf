@@ -8,22 +8,32 @@ locals {
 
   example-host-userdata = <<USERDATA
 #!/bin/bash -xe
+
+#SECURITY HOLE: Just for easy demonstration, the following enables password login and creates an aci-user with a password exposed in version control. 
+#Replace the following 4 lines with something more secure when you establish a secrets management system.
+/usr/sbin/useradd aci-user
+echo aci-user:just-for-demo123 | chpasswd
+echo 'aci-user ALL=(ALL:ALL) ALL' | sudo EDITOR='tee -a' visudo
+sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
+systemctl restart sshd
+
+mkdir /home/aci-user/cloned-repos
+mkdir /home/aci-user/vars
+
+chown -R aci-user:aci-user /home/aci-user/vars
+chown -R aci-user:aci-user /home/aci-user/cloned-repos
+
 ### Install software
 yum -y update
+sudo yum install git -y
+
+echo "About to install python3"
+sudo yum install -y python3
+sudo yum install -y python3-setuptools
+sudo easy_install-3.7 pip
 
 ##Put any other startup commands you want to put here.
 ##Remember there are other approaches such as configuration tools like Ansible, Chef, Puppet, etc.
-
-#SECURITY HOLE: Just for easy testing, the following enables password login and creates a testuser with a password in version control. 
-#Remove the following lines when you establish a secrets management system.
-/usr/sbin/useradd testuser
-echo testuser:just-for-test123 | chpasswd
-sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config
-#Configure user to not require password to execute sudo commands.  
-cat << 'EOF' > /etc/sudoers.d/testuser
-testuser ALL=(ALL) NOPASSWD: ALL
-EOF  
-systemctl restart sshd  
 
 USERDATA
 
