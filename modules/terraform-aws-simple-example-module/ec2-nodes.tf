@@ -34,5 +34,11 @@ resource "aws_instance" "example-host" {
     delete = "60m"
   }
   
-  tags = { Name = "Example-Host" }
+  tags = { 
+    Name = var.vmName
+    System = var.systemName
+    Environment = var.environmentName
+    Owner = var.ownerName
+  }
+
 }

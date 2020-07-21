@@ -6,7 +6,12 @@
 resource "aws_vpc" "example-host" {
   cidr_block = "10.0.0.0/16"
   enable_dns_hostnames = "1"
-  tags = { Name = "example-host" }
+  tags = {
+    Name = var.vpcName
+    System = var.systemName
+    Environment = var.environmentName
+    Owner = var.ownerName
+  }
 }
 
 resource "aws_subnet" "example-host" {

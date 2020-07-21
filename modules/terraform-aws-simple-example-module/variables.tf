@@ -9,6 +9,11 @@ data "aws_availability_zones" "available" {}
 variable "access_key" { }
 variable "secret_access_key" { }
 variable "_region" { }
+variable "vpcName" { }
+variable "systemName" { }
+variable "environmentName" { }
+variable "ownerName" { }
+variable "vmName" { }
 
 # Workstation External IP. Override with variable or hardcoded value if necessary.
 data "http" "admin-external-ip" { url = "http://ipv4.icanhazip.com" }
