@@ -1,0 +1,8 @@
+﻿inputVarName,source,type,identifier,sourceField,secret
+NA,NA,subnetForBuilds,NA,NA,NA
+aws_region,infrastructureConfig.yaml,networkFoundation,instance,region,no
+_public_access_key,generatedKeys.yaml,NA,name,_public_access_key,yes
+_secret_access_key,generatedKeys.yaml,NA,name,_secret_access_key,yes
+vpcId,foundationOutput,NA,NA,vpc_id,no
+cidrSubnet,infrastructureConfig.yaml,imageBuilds/subnetForBuilds,instance,cidrSubnet,no
+cidrBlocks,infrastructureConfig.yaml,imageBuilds/subnetForBuilds,instance,cidrBlocks,no

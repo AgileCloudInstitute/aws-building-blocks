@@ -1,0 +1,51 @@
+{
+  "//": "Copyright 2021 Green River IT (GreenRiverIT.com) as described in LICENSE.txt distributed with this project on GitHub.",
+  "//": "Start at https://github.com/AgileCloudInstitute?tab=repositories",
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": ""
+  },
+  "builders": [
+    {
+      "type": "amazon-ebssurrogate",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "",
+      "vpc_id": "",
+      "subnet_id": "",
+      "security_group_id": "",
+      "from_scratch": "true",
+      "instance_type": "t2.micro",
+      "ssh_username": "ec2-user",
+      "associate_public_ip_address": "true",
+      "ssh_interface": "public_ip",
+      "ami_virtualization_type": "hvm",
+      "aws_polling" : {
+           "delay_seconds": 60,
+           "max_attempts": 50
+      },
+      "launch_block_device_mappings": [
+        {
+          "volume_type": "gp2",
+          "device_name": "/dev/xvdf",
+          "delete_on_termination": false,
+          "volume_size": 10
+        }
+      ],
+      "ami_root_device": {
+        "source_device_name": "/dev/xvdf",
+        "device_name": "/dev/xvda",
+        "delete_on_termination": true,
+        "volume_size": 16,
+        "volume_type": "gp2"
+      },
+      "ami_name": "packer_AWS {{timestamp}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": ""
+    }
+  ]
+}

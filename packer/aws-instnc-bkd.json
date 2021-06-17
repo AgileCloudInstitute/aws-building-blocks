@@ -1,0 +1,43 @@
+{
+  "//": "Copyright 2021 Green River IT (GreenRiverIT.com) as described in LICENSE.txt distributed with this project on GitHub.",
+  "//": "Start at https://github.com/AgileCloudInstitute?tab=repositories",
+  "builders": [
+    {
+      "type": "amazon-instance",
+      "access_key": "",
+      "secret_key": "",
+      "region": "",
+      "vpc_id": "",
+      "subnet_id": "",
+      "security_group_id": "",
+      "source_ami_filter": {
+         "filters": {
+           "architecture": "x86_64",
+           "name": "amzn-ami-hvm*-s3"
+         },
+         "owners": ["amazon"],
+         "most_recent": true
+      },
+      "instance_type": "m1.small",
+      "ssh_username": "ec2-user",
+      "associate_public_ip_address": "true",
+      "ssh_interface": "public_ip",
+      "aws_polling" : {
+           "delay_seconds": 60,
+           "max_attempts": 50
+      },
+      "account_id": "",
+      "s3_bucket": "",
+      "x509_cert_path": "",
+      "x509_key_path": "",
+      "x509_upload_path": "/tmp",
+      "ami_name": "packer-quick-start {{timestamp}}"
+    }
+  ], 
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": ""
+    }
+  ]
+}

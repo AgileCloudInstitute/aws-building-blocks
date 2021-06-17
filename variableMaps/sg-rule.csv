@@ -1,0 +1,14 @@
+﻿inputVarName,source,type,identifier,sourceField,secret
+NA,NA,securityGroupRules,NA,NA,NA
+aws_region,infrastructureConfig.yaml,networkFoundation,instance,region,no
+_public_access_key,generatedKeys.yaml,NA,name,_public_access_key,yes
+_secret_access_key,generatedKeys.yaml,NA,name,_secret_access_key,yes
+vpcName,infrastructureConfig.yaml,networkFoundation,instance,instanceName,no
+vpcId,foundationOutput,NA,NA,vpc_id,no
+vpcCidr,foundationOutput,NA,NA,vpc_cidr,no
+sgId,foundationOutput,NA,NA,sg_id,no
+sgName,foundationOutput,NA,NA,sg_name,no
+ruleType,infrastructureConfig.yaml,systems/securityGroupRules,instance,type,no
+fromPort,infrastructureConfig.yaml,systems/securityGroupRules,instance,fromPort,no
+toPort,infrastructureConfig.yaml,systems/securityGroupRules,instance,toPort,no
+cidrBlocks,infrastructureConfig.yaml,systems/securityGroupRules,instance,cidrBlocks,no

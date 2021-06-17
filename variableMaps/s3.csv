@@ -1,0 +1,13 @@
+﻿inputVarName,source,type,identifier,sourceField,secret
+NA,NA,blobStorage,NA,NA,NA
+aws_region,infrastructureConfig.yaml,networkFoundation,instance,region,no
+_public_access_key,generatedKeys.yaml,NA,name,_public_access_key,yes
+_secret_access_key,generatedKeys.yaml,NA,name,_secret_access_key,yes
+vpcId,foundationOutput,NA,NA,vpc_id,no
+systemName,infrastructureConfig.yaml,tags,instance,systemName,no
+environmentName,infrastructureConfig.yaml,tags,instance,environmentName,no
+ownerName,infrastructureConfig.yaml,tags,instance,ownerName,no
+s3BucketNameTF,infrastructureConfig.yaml,systems/blobStorage,instance,instanceName,no
+dynamoDbTableNameTF,infrastructureConfig.yaml,systems/blobStorage,instance,instanceName,no
+iamRoleName,foundationOutput,NA,NA,iam_role_name,no
+adminPublicIP,customFunction,NA,NA,admin_cidr,no
