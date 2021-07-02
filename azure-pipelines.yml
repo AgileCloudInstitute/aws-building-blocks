@@ -17,7 +17,7 @@ steps:
     echo About to list contents of drop location:
     ls -al $(Build.ArtifactStagingDirectory)
     echo About to copy the artifact elements to the drop location:
-    mv LICENSE $(Build.ArtifactStagingDirectory)
+    mv LICENSE.txt $(Build.ArtifactStagingDirectory)
     mv packer $(Build.ArtifactStagingDirectory)
     mv terraform $(Build.ArtifactStagingDirectory)
     mv variableMaps $(Build.ArtifactStagingDirectory)
