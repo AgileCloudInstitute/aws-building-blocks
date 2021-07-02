@@ -9,18 +9,13 @@ data "aws_route_table" "rt" {
   vpc_id = var.vpcId
 
   filter {
-    #name   = "association.main"
-    #values = [false]
-
     name   = "tag:NameOfTable"
     values = ["example-host"]
-
   }
 
 }
 
 resource "aws_subnet" "example-host" {
-  #depends_on = [aws_vpc.example-host]
   availability_zone = data.aws_availability_zones.available.names[0]
   cidr_block        = var.cidrSubnet
   vpc_id            = data.aws_vpc.selected.id

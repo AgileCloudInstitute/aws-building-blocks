@@ -17,14 +17,11 @@ steps:
     echo About to list contents of drop location:
     ls -al $(Build.ArtifactStagingDirectory)
     echo About to copy the artifact elements to the drop location:
-    mv LICENSE.txt $(Build.ArtifactStagingDirectory)
-    mv calls-to-modules $(Build.ArtifactStagingDirectory)
-    mv modules $(Build.ArtifactStagingDirectory)
-    mv pipeline-tasks $(Build.ArtifactStagingDirectory)
+    mv LICENSE $(Build.ArtifactStagingDirectory)
+    mv packer $(Build.ArtifactStagingDirectory)
+    mv terraform $(Build.ArtifactStagingDirectory)
+    mv variableMaps $(Build.ArtifactStagingDirectory)
     mv README.md $(Build.ArtifactStagingDirectory)
-    mv Move-This-Directory-Outside-Of-Application-Path/vars/yamlInputs/demoConfigDev.yaml $(Build.ArtifactStagingDirectory)
-    mv Move-This-Directory-Outside-Of-Application-Path/vars/yamlInputs/demoConfigTest.yaml $(Build.ArtifactStagingDirectory)
-    mv Move-This-Directory-Outside-Of-Application-Path/vars/yamlInputs/demoConfig.yaml $(Build.ArtifactStagingDirectory)
     echo About to list contents of Artifact Staging Directory
     ls -al $(Build.ArtifactStagingDirectory)
   displayName: 'Run a multi-line script'
