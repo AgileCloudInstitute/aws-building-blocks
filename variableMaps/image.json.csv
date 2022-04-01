@@ -1,0 +1,9 @@
+﻿inputVarName,source,type,identifier,sourceField,secret
+NA,NA,images,NA,NA,NA
+VpcId,foundationOutput,NA,NA,VpcId,no
+RouteTableId,foundationOutput,NA,NA,RouteTableId,no
+KeyName,generatedKeys.yaml,images,instance,KeyName,yes
+SSHLocation,infrastructureConfig.yaml,imageBuilds/images,instance,SSHLocation,no
+InstanceType,infrastructureConfig.yaml,imageBuilds/images,instance,InstanceType,no
+AvailabilityZone,infrastructureConfig.yaml,imageBuilds/images,instance,AvailabilityZone,no
+CidrBlock,infrastructureConfig.yaml,imageBuilds/images,instance,CidrBlock,no

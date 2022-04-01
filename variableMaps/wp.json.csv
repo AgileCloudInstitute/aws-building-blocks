@@ -1,0 +1,11 @@
+﻿inputVarName,source,type,identifier,sourceField,secret
+NA,NA,subnetsWithScaleSet,NA,NA,NA
+VpcId,foundationOutput,NA,NA,VpcId,no
+RouteTableId,foundationOutput,NA,NA,RouteTableId,no
+KeyName,generatedKeys.yaml,subnetsWithScaleSet,instance,KeyName,yes
+InstanceType,infrastructureConfig.yaml,subnetsWithScaleSet,instance,InstanceType,no
+SSHLocation,infrastructureConfig.yaml,subnetsWithScaleSet,instance,SSHLocation,no
+DBName,infrastructureConfig.yaml,subnetsWithScaleSet,instance,DBName,no
+DBUser,infrastructureConfig.yaml,subnetsWithScaleSet,instance,DBUser,no
+DBPassword,generatedKeys.yaml,subnetsWithScaleSet,instance,DBPassword,yes
+DBRootPassword,generatedKeys.yaml,subnetsWithScaleSet,instance,DBRootPassword,yes
