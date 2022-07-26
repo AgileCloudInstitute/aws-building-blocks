@@ -1,3 +1,0 @@
-﻿inputVarName,source,type,identifier,sourceField,secret
-NA,NA,networkFoundation,NA,NA,NA
-vpcCIDR,infrastructureConfig.yaml,networkFoundation,instance,vpcCIDR,no

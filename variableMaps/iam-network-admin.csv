@@ -1,5 +1,0 @@
-﻿inputVarName,source,type,identifier,sourceField,secret
-NA,NA,iamNetworkAdmin,NA,NA,NA
-_region,infrastructureConfig.yaml,networkFoundation,instance,region,no
-access_key,iamUserKeys.yaml,NA,name,_public_access_key,yes
-secret_access_key,iamUserKeys.yaml,NA,name,_secret_access_key,yes
