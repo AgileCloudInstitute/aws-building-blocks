@@ -19,7 +19,7 @@ crash.log
 #First ignore everything inside terraform/calls-to-modules/instances/
 terraform/calls-to-modules/instances/**
 #Then add README.md back into terraform/calls-to-modules/instances/
-!terraform/calls-to-modules/instances/README.md
+!terraform/calls-to-modules/instances/default.md
 
 # Ignore any .tfvars files that are generated automatically for each Terraform run. Most
 # .tfvars files are managed as part of configuration and so should be included in
