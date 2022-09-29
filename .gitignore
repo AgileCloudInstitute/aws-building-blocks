@@ -4,9 +4,22 @@
 # .tfstate files
 *.tfstate
 *.tfstate.*
+**/*.tfstate
+**/*.tfstate.*
 
 # Crash log files
 crash.log
+**/*crash*
+**/*crash.log
+**/crash.log
+
+#ad-role.json file created when creating azure images
+**/ad-role.json
+
+#First ignore everything inside terraform/calls-to-modules/instances/
+terraform/calls-to-modules/instances/**
+#Then add README.md back into terraform/calls-to-modules/instances/
+!terraform/calls-to-modules/instances/README.md
 
 # Ignore any .tfvars files that are generated automatically for each Terraform run. Most
 # .tfvars files are managed as part of configuration and so should be included in
@@ -20,6 +33,10 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+**/override.tf
+**/override.tf.json
+**/*_override.tf
+**/*_override.tf.json
 
 # Include override files you do wish to add to version control using negated pattern
 #
