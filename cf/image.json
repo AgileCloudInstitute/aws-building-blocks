@@ -86,12 +86,10 @@
         ],
         "ConstraintDescription": "must be a valid EC2 instance type."
       },
-
       "AvailabilityZone": {
         "Description": "The availability zone in which the subnet will be created.",
         "Type" : "String"
       },
-
       "CidrBlock": {
         "Description": "The Cidr for the Subnet.",
         "Type" : "String"
