@@ -1,8 +1,8 @@
 aws-building-blocks (Licensed Product) and all its components are protected by 
 copyright, and are distributed under the following terms.  
   
-aws-building-blocks, developed and copyrighted by Green River IT Incorporated 
-(Green River IT) is intended to serve as a working example of the foundation of a 
+aws-building-blocks, developed and copyrighted by Agile Cloud Institute Incorporated 
+(Agile Cloud Institute) is intended to serve as a working example of the foundation of a 
 software-defined data center, capable of creating, updating, and deleting cloud 
 resources.    
   
@@ -28,21 +28,21 @@ DEALING, USAGE OR TRADE PRACTICE.
 Support  
   
 LICENSED PRODUCT IS PROVIDED WITH NO SUPPORT AND WITHOUT ANY
-OBLIGATION ON THE PART OF GREEN RIVER IT OR ANY OF ITS SUBSIDIARIES 
+OBLIGATION ON THE PART OF AGILE CLOUD INSTITUTE OR ANY OF ITS SUBSIDIARIES 
 OR AFFILIATES TO ASSIST IN ITS USE, CORRECTION, MODIFICATION OR ENHANCEMENT.  
   
-Support may be available from Green River IT to users who have agreed to a
+Support may be available from Agile Cloud Institute to users who have agreed to a
 support contract.  
   
 Liability  
   
-GREEN RIVER IT OR ANY OF ITS SUBSIDIARIES OR AFFILIATES SHALL HAVE NO LIABILITY
+AGILE CLOUD INSTITUTE OR ANY OF ITS SUBSIDIARIES OR AFFILIATES SHALL HAVE NO LIABILITY
 WITH RESPECT TO THE INFRINGEMENT OF COPYRIGHTS, TRADE SECRETS OR ANY
 PATENTS BY LICENSED PRODUCT OR ANY PART THEREOF.  
   
-IN NO EVENT WILL GREEN RIVER IT OR ANY OF ITS SUBSIDIARIES OR AFFILIATES BE
+IN NO EVENT WILL AGILE CLOUD INSTITUTE OR ANY OF ITS SUBSIDIARIES OR AFFILIATES BE
 LIABLE FOR ANY LOST REVENUE OR PROFITS OR OTHER SPECIAL, INDIRECT AND
-CONSEQUENTIAL DAMAGES, EVEN IF GREEN RIVER IT HAS BEEN ADVISED OF THE 
+CONSEQUENTIAL DAMAGES, EVEN IF AGILE CLOUD INSTITUTE HAS BEEN ADVISED OF THE 
 POSSIBILITY OF SUCH DAMAGES.  
   
-aws-building-blocks copyright Green River IT. Placerville CA USA, 2021.  
+aws-building-blocks copyright Agile Cloud Institute. Placerville CA USA, 2023.  
