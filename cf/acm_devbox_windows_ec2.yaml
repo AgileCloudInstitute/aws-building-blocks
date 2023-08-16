@@ -1,0 +1,297 @@
+Description:  Deploys a Windows EC2 instance within a minimal VPC.  Provides an 
+  example for logging into the Windows EC2 instance remotely using an RDP file.  
+  USE IN us-west-1 Oregon REGION ONLY.  YOU MUST CHANGE THE ami-06810ab448caa0133 
+  AMI ID BEFORE TRYING OTHER REGIONS BECAUSE ami-06810ab448caa0133 ONLY WORKS IN 
+  us-west-1.  ALSO NOTE THAT t2.micro IS NOT BIG ENOUGH FOR MOST DEVBOX REQUIREMENTS.  
+  WE ARE ONLY USING t2.micro FOR THE DEMOS BECAUSE t2.micro IS PART OF THE FREE TIER.  
+
+Parameters:
+  EnvironmentName:
+    Description: An environment name that is prefixed to resource names
+    Type: String
+    Default: RDP Example
+
+  VpcCIDR:
+    Description: Please enter the IP range (CIDR notation) for this VPC
+    Type: String
+    Default: 10.192.0.0/16
+
+  PublicSubnetCIDR:
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
+    Type: String
+    Default: 10.192.10.0/24
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Ref EnvironmentName
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Ref EnvironmentName
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref PublicSubnetCIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Public Subnet (AZ1)
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Public Routes
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow RDP connections
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - Description: Allow all outbound traffic
+          IpProtocol: "-1"
+          CidrIp: 0.0.0.0/0
+
+  NewKeyPair:
+    Type: 'AWS::EC2::KeyPair'
+    Properties:
+      KeyName: MyKeyPair
+
+  MyEC2Instance: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: "ami-06810ab448caa0133"
+      KeyName: !Ref NewKeyPair
+      InstanceType: "t2.micro"
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "InstanceSecurityGroup"
+          SubnetId: 
+            Ref: "PublicSubnet"
+      UserData:
+        Fn::Base64: 
+          !Sub |
+            <powershell>
+            #mkdir $HOME\\acmhome\\
+            New-Item -ItemType Directory -Force -Path $HOME\\acmhome\\
+
+            echo "About to dir $HOME\\acmhome\\ "
+            cd $HOME\\acmhome\\
+            dir 
+            $aloc="$HOME\acmhome"
+            # Update the in-process PATH value.
+            $env:Path += ";$aloc"
+            Write-Output "About to print temporary PATH: "
+            Write-Output $env:Path
+            Write-Output "About to prepend acm to path permanently. "
+            # Get the *unexpanded* value of the machine-level PATH environment variable from the registry.
+            $oldpath = (Get-Item 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment').GetValue('Path', $null, 'DoNotExpandEnvironmentNames')
+            $newpath = "$aloc;$oldpath"
+            "About to print newpath "
+            $newpath
+            Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $newpath
+            # Now that the registry has been updated, the Windows shell must be notified of the update.
+            # A non-disruptive approach is to create and delete a persistent dummy variable via [Environment]::SetEnvironmentVariable().
+            [string] $dummyEnvVarName = New-Guid
+            [Environment]::SetEnvironmentVariable($dummyEnvVarName, 'dummy', 'User')
+            [Environment]::SetEnvironmentVariable($dummyEnvVarName, $null, 'User')
+            Write-Output "About to print permanent PATH: "
+            Write-Output $env:Path
+
+
+            Write-Output "About to install AWS cli. "
+            msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi /qn
+
+            Write-Output "About to add AWS cli to path temporarily. "
+            $env:Path += ";C:\Program Files\Amazon\AWSCLIV2\"
+
+            Write-Output "About to add AWS cli to path permanently. "
+            $oldpath = (Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).path
+            $newpath = "C:\Program Files\Amazon\AWSCLIV2\;$oldpath"
+            Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $newpath
+
+            Write-Output "About to create temp folder. "
+            New-Item -ItemType Directory -Force -Path C:\temp
+
+            Write-Output "About to set security protocol. "
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+            Write-Output "About to download Python executable to temp folder. "
+            Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe" -OutFile "c:/temp/python-3.11.4-amd64.exe"
+
+            Write-Output "About to install Python. "
+            #Next line works, but we are replacing it with the command after it so we can check the exit code with the 4 lines following the next command.
+            #Start-Process -Wait c:/temp/python-3.11.4-amd64.exe '/quiet InstallAllUsers=0 InstallLauncherAllUsers=0 PrependPath=1 Include_test=0'
+            # Note the `| Write-Output` at the end, which makes the invocation synchronous and populates the $LASTEXITCODE variable.
+            c:/temp/python-3.11.4-amd64.exe /quiet InstallAllUsers=0 InstallLauncherAllUsers=0 PrependPath=1 Include_test=0 | Write-Output
+
+            # Check if the installation failed and exit, if so.
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Installation failed unexpectedly; exit code is $LASTEXITCODE."
+              exit $LASTEXITCODE
+            }
+
+            Write-Output "About to append python to path temporarily. "
+            $env:Path += ";$($env:LOCALAPPDATA)\Programs\Python\Python311\;$($env:LOCALAPPDATA)\Programs\Python\Python311\Scripts\"
+
+            Write-Output "About to prepend python to path permanently. "
+            $ploc="$($env:LOCALAPPDATA)\Programs\Python\Python311\;$($env:LOCALAPPDATA)\Programs\Python\Python311\Scripts\"
+            $oldpath = (Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).path
+            $newpath = "$ploc;$oldpath"
+            Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $newpath
+
+            Write-Output "About to test Python version. "
+            python --version
+
+            Write-Output "About to install az cli"
+            $ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'; Remove-Item .\AzureCLI.msi
+
+            Write-Output "About to add az cli to path temporarily. "
+            $env:Path += ";C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin"
+
+            Write-Output "az cli's own installation process should have added az to the path permenently. "
+
+            Write-Output "About to download git installer. "
+            $exePath = "$env:TEMP\git.exe"
+            Invoke-WebRequest -Uri https://github.com/git-for-windows/git/releases/download/v2.37.1.windows.1/Git-2.37.1-64-bit.exe -UseBasicParsing -OutFile $exePath
+
+            Write-Output "About to execute git installer"
+            Start-Process $exePath -ArgumentList '/VERYSILENT /NORESTART /NOCANCEL /SP- /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS /COMPONENTS="icons,ext\reg\shellhere,assoc,assoc_sh"' -Wait
+
+            Write-Output "About to add 'C:\Program Files\Git\bin' to PATH for bash.exe "
+            [Environment]::SetEnvironmentVariable('Path', "$([Environment]::GetEnvironmentVariable('Path', 'Machine'));C:\Program Files\Git\bin", 'Machine')
+
+            Write-Output "About to make new environment variables available in the current PowerShell session: "
+            # Make new environment variables available in the current PowerShell session:
+            foreach($level in "Machine","User") {
+               [Environment]::GetEnvironmentVariables($level).GetEnumerator() | % {
+                  # For Path variables, append the new values, if they're not already in there
+                  if($_.Name -match 'Path$') { 
+                     $_.Value = ($((Get-Content "Env:$($_.Name)") + ";$($_.Value)") -split ';' | Select -unique) -join ';'
+                  }
+                  $_
+               } | Set-Content -Path { "Env:$($_.Name)" }
+            }
+
+            Write-Output "About to check git version. "
+            git --version
+
+            #This script checks versions of python, git, aws cli, and azure-cli assuming they are already installed.  
+            New-Item -ItemType Directory -Force -Path C:\\stgng\\
+            New-Item -ItemType Directory -Force -Path $HOME\\acmconfig\\
+            New-Item -ItemType Directory -Force -Path $HOME\\acm\\
+            New-Item -ItemType Directory -Force -Path $HOME\\acm\\keys\\
+            New-Item -ItemType Directory -Force -Path $HOME\\acm\\keys\\starter\\
+            New-Item -ItemType Directory -Force -Path $HOME\\acm\\keys\\adminAccounts\\
+            python -m pip install --upgrade pip requests
+            python -m pip install --upgrade pip PyYaml
+            python -m pip install --upgrade pip IPy
+            python -m pip install --upgrade pip pyinstaller
+            python -m pip install --upgrade charset-normalizer
+            echo "About to: az --version"
+            az --version
+            echo 'About to: "az extension add --name resource-graph"'
+            az extension add --name resource-graph
+            New-Item -ItemType Directory -Force -Path $HOME\\keys\\
+            New-Item -ItemType Directory -Force -Path $HOME\\keys\\starter\\
+            New-Item -ItemType Directory -Force -Path $HOME\\acm\\logs\\
+            #MOVING THIS LINE TO TOP: New-Item -ItemType Directory -Force -Path $HOME\\acmhome\\
+            #Consider deleting the next 2 lines because the directories might not be needed.
+            New-Item -ItemType Directory -Force -Path C:\\a\\AgileCloudManager\\acmAdmin\\
+            New-Item -ItemType Directory -Force -Path C:\\a\\AgileCloudManager\\acmAdmin\\binaries\\
+            echo "About to show permanent PATH"
+            Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name path
+            python -m pip install --upgrade pip requests
+            echo "About to show temporary PATH"
+            echo $env:Path
+            echo 'About to: aws --version'
+            aws --version
+
+            ##############################################################################################
+            ### Install acm
+            ##############################################################################################
+            $zipName="AgileCloudManager-windows-1.2.zip"
+            echo "About to dir initially"
+            dir
+            $addressForCurl="https://download.agilecloudinstitute.io/"+$zipName
+            echo "About to curl"
+            curl -o $zipName $addressForCurl
+            echo "About to dir after curl"
+            dir
+            echo "Done with dir"
+            mkdir staging
+            Expand-Archive $zipName -DestinationPath "staging"
+            echo "About to dir staging"
+            dir staging
+            $folderName="AgileCloudManager-windows-1.2"
+            $sourceFolderName="staging\\*"
+            Copy-Item -Path $sourceFolderName -Recurse -Destination $HOME\\acmhome\\ -Verbose
+            echo "About to dir $HOME\\acmhome\\ "
+            cd $HOME\\acmhome\\
+            dir 
+
+            </powershell>
+
+Outputs:
+  VPC:
+    Description: A reference to the created VPC
+    Value: !Ref VPC
+
+  PublicSubnet:
+    Description: A reference to the public subnet in the 1st Availability Zone
+    Value: !Ref PublicSubnet
+
+  InstanceSecurityGroup:
+    Description: Security group 
+    Value: !Ref InstanceSecurityGroup
+
+  NewKeyPair:
+    Description: Name of the newly-created key pair.
+    Value: !Ref NewKeyPair
+
+  EC2InstanceId:
+    Description: The Id of the EC2 instance
+    Value: !Ref MyEC2Instance
