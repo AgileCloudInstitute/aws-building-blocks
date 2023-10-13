@@ -1,0 +1,33 @@
+Description: Create tags for Lake Formation resources
+Parameters:
+  ClassificationVal1:
+    Type: String
+    Default: Sensitive
+  ClassificationVal2:
+    Type: String
+    Default: Non-Sensitive
+  GroupVal1:
+    Type: String
+    Default: developer
+  GroupVal2:
+    Type: String
+    Default: campaign
+  GroupVal3:
+    Type: String
+    Default: analyst
+Resources:
+  ClassificationTag:
+    Type: AWS::LakeFormation::Tag
+    Properties:
+      TagKey: "Classification"
+      TagValues:
+        - !Ref ClassificationVal1
+        - !Ref ClassificationVal2
+  GroupTag:
+    Type: AWS::LakeFormation::Tag
+    Properties:
+      TagKey: "group"
+      TagValues:
+        - !Ref GroupVal1
+        - !Ref GroupVal2
+        - !Ref GroupVal3

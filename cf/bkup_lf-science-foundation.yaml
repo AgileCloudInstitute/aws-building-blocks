@@ -1,0 +1,23 @@
+Description: CloudFormation template to create foundation items to support data science services
+Parameters:
+  BucketNameScienceEMR:
+    Type: String
+    Default: emr-scientist
+    AllowedValues:
+      - emr-scientist
+    Description: Name of the database that will be created.
+Resources:
+  EMRScienceBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      BucketName: !Join 
+        - '-'
+        - - emr-scientist
+          - !Ref 'AWS::AccountId'
+Outputs:
+  LFEMRScienceBucketName:
+    Description: Science EMR Cluster Bucket Name
+    Value: !Ref EMRScienceBucket
