@@ -1,0 +1,196 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  S3BucketNameForOutput:
+    Type: String
+    Description: >-
+      S3 bucket to store output data, enter
+      lf-workshop-accountid replace accountid is your AWS Account ID
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9_-]*'
+  VPC:
+    Type: 'AWS::EC2::VPC::Id'
+    Description: 'VPC to be used for Amazon SageMaker Studio , please choose LF-Workshop-VPC'
+    AllowedPattern: .+
+  PrivateSubnet:
+    Type: 'AWS::EC2::Subnet::Id'
+    Description: >-
+      Private Subnet to be used for Amazon SageMaker Studio , please choose
+      LF-Workshop-PrivateSubnet
+    AllowedPattern: .+
+  SageMakerSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup::Id'
+    Description: >-
+      Security Group used for  Amazon SageMaker Studio , please choose
+      SageMaker-SecurityGroup
+    AllowedPattern: .+
+Mappings:
+  ARNs:
+    us-east-1:
+      arn: 'arn:aws:sagemaker:us-east-1:081325390199:image/jupyter-server-3'
+    us-east-2:
+      arn: 'arn:aws:sagemaker:us-east-2:429704687514:image/jupyter-server-3'
+    us-west-1:
+      arn: 'arn:aws:sagemaker:us-west-1:742091327244:image/jupyter-server-3'
+    us-west-2:
+      arn: 'arn:aws:sagemaker:us-west-2:236514542706:image/jupyter-server-3'
+Resources:
+  IAMPolicySageMakerStudioBasic:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: SageMakerStudioBasicPolicy
+      Path: /
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AmazonSageMakerStudioReadOnly
+            Effect: Allow
+            Action:
+              - 'sagemaker:DescribeDomain'
+              - 'sagemaker:ListDomains'
+              - 'sagemaker:ListUserProfiles'
+              - 'sagemaker:ListApps'
+            Resource: '*'
+          - Sid: AmazonSageMakerAddTags
+            Effect: Allow
+            Action:
+              - 'sagemaker:AddTags'
+            Resource: '*'
+  IAMPolicySageMakerExecution:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: SageMakerExecutionPolicy
+      Path: /
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AmazonSageMakerStudioIAMPassRole
+            Effect: Allow
+            Action:
+              - 'iam:PassRole'
+              - 'iam:GetRole'
+              - 'sts:GetCallerIdentity'
+            Resource: '*'
+          - Sid: DenyAssummingOtherIAMRoles
+            Effect: Deny
+            Action:
+              - 'sts:AssumeRole'
+            Resource: '*'
+          - Sid: AmazonSageMakerTrainingAndDeploy
+            Effect: Allow
+            Action:
+              - 'sagemaker:CreateTrainingJob'
+              - 'sagemaker:DescribeTrainingJob'
+              - 'sagemaker:CreateModel'
+              - 'sagemaker:CreateEndpoint'
+              - 'sagemaker:CreateEndpointConfig'
+              - 'sagemaker:DescribeEndpoint'
+              - 'sagemaker:InvokeEndpoint'
+              - 'sagemaker:DeleteEndpoint'
+              - 'sagemaker:DeleteEndpointConfig'
+              - 'sagemaker:CreateEndpointConfig'
+            Resource: '*'
+          - Sid: AmazonSageMakerAllowedApp
+            Effect: Allow
+            Action:
+              - 'sagemaker:*App'
+            Resource: !Sub >-
+              arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:app/*/${!aws:PrincipalTag/userprofilename}/*
+          - Sid: AmazonSageMakerDeniedApps
+            Effect: Allow
+            Action:
+              - 'sagemaker:*App'
+            NotResource: !Sub >-
+              arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:app/*/${!aws:PrincipalTag/userprofilename}/*
+          - Sid: GlueLakeFormationPermissions
+            Effect: Allow
+            Action:
+              - 'glue:GetDatabase'
+              - 'glue:GetDatabases'
+              - 'glue:GetTable'
+              - 'glue:GetTables'
+              - 'glue:SearchTables'
+              - 'glue:GetPartition'
+              - 'glue:GetPartitions'
+            Resource: '*'
+          - Sid: LakeFormationPermissions
+            Effect: Allow
+            Action:
+              - 'lakeformation:GetDataAccess'
+              - 'lakeformation:StartQueryPlanning'
+              - 'lakeformation:GetQueryState'
+              - 'lakeformation:GetWorkUnits'
+              - 'lakeformation:GetWorkUnitResults'
+              - 'lakeformation:GetResourceLFTags'
+              - 'lakeformation:ListLFTags'
+              - 'lakeformation:GetLFTag'
+              - 'lakeformation:SearchTablesByLFTags'
+              - 'lakeformation:SearchDatabasesByLFTags'
+            Resource: '*'
+          - Sid: S3PermissionsForOutputBucket
+            Effect: Allow
+            Action:
+              - 's3:ListBucket'
+              - 's3:GetObject'
+              - 's3:PutObject'
+              - 's3:DeleteObject'
+            Resource:
+              - !Sub 'arn:aws:s3:::${S3BucketNameForOutput}'
+              - !Sub 'arn:aws:s3:::${S3BucketNameForOutput}/*'
+          - Sid: CloudWatchLogsPermissions
+            Effect: Allow
+            Action:
+              - 'logs:DescribeLogStreams'
+            Resource:
+              - 'arn:aws:logs:*:*:*'
+  IAMRoleSageMakerDataScientist:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: SageMakerStudioExecutionRole_data-scientist
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - glue.amazonaws.com
+                - sagemaker.amazonaws.com
+      Path: /
+      ManagedPolicyArns:
+        - !Ref IAMPolicySageMakerStudioBasic
+        - !Ref IAMPolicySageMakerExecution
+        - >-
+          arn:aws:iam::aws:policy/service-role/AwsGlueSessionUserRestrictedServiceRole
+  SageMakerProfileDataScientist:
+    Type: 'AWS::SageMaker::UserProfile'
+    Properties:
+      DomainId: !Ref StudioDomain
+      UserProfileName: data-scientist
+      Tags:
+        - Key: studiouserid
+          Value: data-scientist
+      UserSettings:
+        ExecutionRole: !GetAtt 
+          - IAMRoleSageMakerDataScientist
+          - Arn
+  StudioDomain:
+    Type: 'AWS::SageMaker::Domain'
+    Properties:
+      AppNetworkAccessType: VpcOnly
+      AuthMode: IAM
+      DomainName: StudioDomainForGlue
+      VpcId: !Ref VPC
+      SubnetIds:
+        - !Ref PrivateSubnet
+      DefaultUserSettings:
+        ExecutionRole: !GetAtt 
+          - IAMRoleSageMakerDataScientist
+          - Arn
+        JupyterServerAppSettings:
+          DefaultResourceSpec:
+            SageMakerImageArn: !FindInMap 
+              - ARNs
+              - !Ref 'AWS::Region'
+              - arn
+        SecurityGroups:
+          - !Ref SageMakerSecurityGroup

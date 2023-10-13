@@ -1,0 +1,23 @@
+Description: Associate a user with a Lake Formation tag
+Parameters:
+  GroupVal3:
+    Type: String
+    Default: analyst
+Resources:
+  TagPermission:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    Properties: 
+      Principal: 
+          DataLakePrincipalIdentifier: arn:aws:iam::555344254085:user/lf-data-admin
+      Permissions: 
+        - ASSOCIATE
+        - DESCRIBE
+      PermissionsWithGrantOption:
+        - ASSOCIATE
+        - DESCRIBE
+      Resource: 
+        LFTag:
+          CatalogId: !Ref AWS::AccountId
+          TagKey: "group"
+          TagValues:
+              - !Ref GroupVal3

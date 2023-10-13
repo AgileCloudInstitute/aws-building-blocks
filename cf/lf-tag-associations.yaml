@@ -1,0 +1,54 @@
+Description: Assign LF-Tags to data catalog objects
+Parameters:
+  ClassificationVal1:
+    Type: String
+    Default: Sensitive
+  ClassificationVal2:
+    Type: String
+    Default: Non-Sensitive
+  GroupVal3:
+    Type: String
+    Default: analyst
+Resources:
+  TagOnTcpDatabase:
+    Type: AWS::LakeFormation::TagAssociation
+    Properties:
+      Resource:
+        Database:
+          CatalogId: !Ref AWS::AccountId
+          Name: "tpc"
+      LFTags:
+        - CatalogId: !Ref AWS::AccountId
+          TagKey: "Classification"
+          TagValues:
+            - !Ref ClassificationVal2
+  TagOnCustomerTable:
+    Type: AWS::LakeFormation::TagAssociation
+    Properties:
+      Resource:
+        TableWithColumns:
+          CatalogId: !Ref AWS::AccountId
+          DatabaseName: "tpc"
+          Name: "dl_tpc_customer"
+          ColumnNames:
+            - "c_first_name"
+            - "c_last_name"
+            - "c_email_address"
+      LFTags:
+        - CatalogId: !Ref AWS::AccountId
+          TagKey: "Classification"
+          TagValues:
+            - !Ref ClassificationVal1
+  TagOnHouseholdDemographicsTable:
+    Type: AWS::LakeFormation::TagAssociation
+    Properties:
+      Resource:
+        Table:
+          CatalogId: !Ref AWS::AccountId
+          DatabaseName: "tpc"
+          Name: "dl_tpc_household_demographics"
+      LFTags:
+        - CatalogId: !Ref AWS::AccountId
+          TagKey: "group"
+          TagValues:
+            - !Ref GroupVal3

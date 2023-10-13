@@ -1,0 +1,518 @@
+Description: >-
+  Amazon EMR cluster with AWS Lake Formation integration with Runtime Role
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: Amazon EMR Cluster Configuration
+        Parameters:
+          - ReleaseLabel
+          - InstanceType
+          - VPCPublicSubnet
+          - EC2KeyPair
+    ParameterLabels:
+      ReleaseLabel:
+        default: EMR Release Label
+      VPCPublicSubnet:
+        default: VPC Public Subnet
+      EC2KeyPair:
+        default: EC2 Key Pair
+Mappings:
+  AWSRegionAMI:
+    us-east-1:
+      HVM64: ami-0c6b1d09930fac512
+    us-east-2:
+      HVM64: ami-02ccb28830b645a41
+    us-west-2:
+      HVM64: ami-04590e7389a6e577c
+    us-west-1:
+      HVM64: ami-03caa3f860895f82e
+    ap-northeast-1:
+      HVM64: ami-011facbea5ec0363b
+Parameters:
+  EC2KeyPair:
+    Description: Amazon EC2 Key Pair
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    MinLength: 1
+    AllowedPattern: .+
+  ReleaseLabel:
+    Type: String
+    Default: emr-6.7.0
+    AllowedValues:
+      - emr-6.7.0
+    Description: Amazon EMR Version
+  VPCPublicSubnet:
+    Type: 'AWS::EC2::Subnet::Id'
+    Description: >-
+      Public Subnet to be used for Amazon EMR cluster, please choose either
+      LF-Workshop-PublicSubnetOne or LF-Workshop-PublicSubnetTwo
+    AllowedPattern: .+
+  InstanceType:
+    Type: String
+    Default: m4.xlarge
+    Description: Amazon EMR Cluster Instance Type
+  EMRStepUserPassword:
+    Type: String
+    Default: Password2!
+    Description: Console password for Emr Step User.
+Resources:
+  EMRStepUser:
+    Type: 'AWS::IAM::User'
+    Properties:
+      Path: /
+      LoginProfile:
+        Password: !Ref EMRStepUserPassword
+        PasswordResetRequired: false
+      Policies:
+        - PolicyName: LF-Athena-Query-Output-Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:Put*'
+                  - 's3:Get*'
+                  - 's3:List*'
+                Resource:
+                  - !Join 
+                    - ''
+                    - - 'arn:aws:s3:::lf-workshop-'
+                      - !Ref 'AWS::AccountId'
+                      - /emrlogs*
+                  - !Join 
+                    - ''
+                    - - 'arn:aws:s3:::lf-workshop-'
+                      - !Ref 'AWS::AccountId'
+                      - /athena-results/*
+        - PolicyName: LF-EMR-Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'lakeformation:StartQueryPlanning'
+                  - 'lakeformation:GetQueryState'
+                  - 'lakeformation:GetWorkUnits'
+                  - 'lakeformation:GetWorkUnitResults'
+                  - 'elasticmapreduce:*'
+                Resource: '*'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonAthenaFullAccess'
+        - 'arn:aws:iam::aws:policy/AWSCloudShellFullAccess'
+      UserName: emr-step-user
+  LFEMRRTRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2008-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              Service: elasticmapreduce.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: LF-EMR-RT-Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Resource: '*'
+                Action:
+                  - 'ec2:AuthorizeSecurityGroupEgress'
+                  - 'ec2:AuthorizeSecurityGroupIngress'
+                  - 'ec2:CancelSpotInstanceRequests'
+                  - 'ec2:CreateNetworkInterface'
+                  - 'ec2:CreateSecurityGroup'
+                  - 'ec2:CreateTags'
+                  - 'ec2:DeleteNetworkInterface'
+                  - 'ec2:DeleteSecurityGroup'
+                  - 'ec2:DeleteTags'
+                  - 'ec2:DescribeAvailabilityZones'
+                  - 'ec2:DescribeAccountAttributes'
+                  - 'ec2:DescribeDhcpOptions'
+                  - 'ec2:DescribeImages'
+                  - 'ec2:DescribeInstanceStatus'
+                  - 'ec2:DescribeInstances'
+                  - 'ec2:DescribeKeyPairs'
+                  - 'ec2:DescribeNetworkAcls'
+                  - 'ec2:DescribeNetworkInterfaces'
+                  - 'ec2:DescribePrefixLists'
+                  - 'ec2:DescribeRouteTables'
+                  - 'ec2:DescribeSecurityGroups'
+                  - 'ec2:DescribeSpotInstanceRequests'
+                  - 'ec2:DescribeSpotPriceHistory'
+                  - 'ec2:DescribeSubnets'
+                  - 'ec2:DescribeTags'
+                  - 'ec2:DescribeVpcAttribute'
+                  - 'ec2:DescribeVpcEndpoints'
+                  - 'ec2:DescribeVpcEndpointServices'
+                  - 'ec2:DescribeVpcs'
+                  - 'ec2:DetachNetworkInterface'
+                  - 'ec2:ModifyImageAttribute'
+                  - 'ec2:ModifyInstanceAttribute'
+                  - 'ec2:RequestSpotInstances'
+                  - 'ec2:RevokeSecurityGroupEgress'
+                  - 'ec2:RunInstances'
+                  - 'ec2:TerminateInstances'
+                  - 'ec2:DeleteVolume'
+                  - 'ec2:DescribeVolumeStatus'
+                  - 'ec2:DescribeVolumes'
+                  - 'ec2:DetachVolume'
+                  - 'iam:GetRole'
+                  - 'iam:GetRolePolicy'
+                  - 'iam:ListInstanceProfiles'
+                  - 'iam:ListRolePolicies'
+                  - 'iam:PassRole'
+                  - 'sdb:BatchPutAttributes'
+                  - 'sdb:Select'
+                  - 'sqs:CreateQueue'
+                  - 'sqs:Delete*'
+                  - 'sqs:GetQueue*'
+                  - 'sqs:PurgeQueue'
+                  - 'sqs:ReceiveMessage'
+                  - 'cloudwatch:PutMetricAlarm'
+                  - 'cloudwatch:DescribeAlarms'
+                  - 'cloudwatch:DeleteAlarms'
+                  - 'application-autoscaling:RegisterScalableTarget'
+                  - 'application-autoscaling:DeregisterScalableTarget'
+                  - 'application-autoscaling:PutScalingPolicy'
+                  - 'application-autoscaling:DeleteScalingPolicy'
+                  - 'application-autoscaling:Describe*'
+              - Effect: Allow
+                Action: 'iam:CreateServiceLinkedRole'
+                Resource: >-
+                  arn:aws:iam::*:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot*
+                Condition:
+                  StringLike:
+                    'iam:AWSServiceName': spot.amazonaws.com
+      RoleName: LF-EMR-RT-Role
+  LFEMRRTInstanceProfileRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: LF-EMR-RT-InstanceProfile-Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Resource: '*'
+                Action:
+                  - 'cloudwatch:*'
+                  - 'dynamodb:*'
+                  - 'ec2:Describe*'
+                  - 'elasticmapreduce:Describe*'
+                  - 'elasticmapreduce:ListBootstrapActions'
+                  - 'elasticmapreduce:ListClusters'
+                  - 'elasticmapreduce:ListInstanceGroups'
+                  - 'elasticmapreduce:ListInstances'
+                  - 'elasticmapreduce:ListSteps'
+                  - 'kinesis:CreateStream'
+                  - 'kinesis:DeleteStream'
+                  - 'kinesis:DescribeStream'
+                  - 'kinesis:GetRecords'
+                  - 'kinesis:GetShardIterator'
+                  - 'kinesis:MergeShards'
+                  - 'kinesis:PutRecord'
+                  - 'kinesis:SplitShard'
+                  - 'rds:Describe*'
+                  - 's3:*'
+                  - 'sdb:*'
+                  - 'sns:*'
+                  - 'sqs:*'
+                  - 'glue:CreateDatabase'
+                  - 'glue:UpdateDatabase'
+                  - 'glue:DeleteDatabase'
+                  - 'glue:GetDatabase'
+                  - 'glue:GetDatabases'
+                  - 'glue:CreateTable'
+                  - 'glue:UpdateTable'
+                  - 'glue:DeleteTable'
+                  - 'glue:GetTable'
+                  - 'glue:GetTables'
+                  - 'glue:GetTableVersions'
+                  - 'glue:CreatePartition'
+                  - 'glue:BatchCreatePartition'
+                  - 'glue:UpdatePartition'
+                  - 'glue:DeletePartition'
+                  - 'glue:BatchDeletePartition'
+                  - 'glue:GetPartition'
+                  - 'glue:GetPartitions'
+                  - 'glue:BatchGetPartition'
+                  - 'glue:CreateUserDefinedFunction'
+                  - 'glue:UpdateUserDefinedFunction'
+                  - 'glue:DeleteUserDefinedFunction'
+                  - 'glue:GetUserDefinedFunction'
+                  - 'glue:GetUserDefinedFunctions'
+              - Effect: Allow
+                Action:
+                  - 'ssm:DescribeAssociation'
+                  - 'ssm:GetDeployablePatchSnapshotForInstance'
+                  - 'ssm:GetDocument'
+                  - 'ssm:DescribeDocument'
+                  - 'ssm:GetManifest'
+                  - 'ssm:GetParameters'
+                  - 'ssm:ListAssociations'
+                  - 'ssm:ListInstanceAssociations'
+                  - 'ssm:PutInventory'
+                  - 'ssm:PutComplianceItems'
+                  - 'ssm:PutConfigurePackageResult'
+                  - 'ssm:UpdateAssociationStatus'
+                  - 'ssm:UpdateInstanceAssociationStatus'
+                  - 'ssm:UpdateInstanceInformation'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'ssmmessages:CreateControlChannel'
+                  - 'ssmmessages:CreateDataChannel'
+                  - 'ssmmessages:OpenControlChannel'
+                  - 'ssmmessages:OpenDataChannel'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'ec2messages:AcknowledgeMessage'
+                  - 'ec2messages:DeleteMessage'
+                  - 'ec2messages:FailMessage'
+                  - 'ec2messages:GetEndpoint'
+                  - 'ec2messages:GetMessages'
+                  - 'ec2messages:SendReply'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'cloudwatch:PutMetricData'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'ec2:DescribeInstanceStatus'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'ds:CreateComputer'
+                  - 'ds:DescribeDirectories'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:DescribeLogGroups'
+                  - 'logs:DescribeLogStreams'
+                  - 'logs:PutLogEvents'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'sts:AssumeRole'
+                  - 'sts:TagSession'
+                  - 'sts:SetSourceIdentity'
+                Resource:
+                  - !Join 
+                    - ''
+                    - - 'arn:aws:iam::'
+                      - !Ref 'AWS::AccountId'
+                      - ':role/ApplicationReadOnlyRuntimeRole'
+                  - !Join 
+                    - ''
+                    - - 'arn:aws:iam::'
+                      - !Ref 'AWS::AccountId'
+                      - ':role/ApplicationReadWriteRuntimeRole'
+      RoleName: LF-EMR-RT-InstanceProfile-Role
+  LFEMRRTInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      InstanceProfileName: LF-EMR-RT-InstanceProfile-Role
+      Path: /
+      Roles:
+        - !Ref LFEMRRTInstanceProfileRole
+  LFEMRRTSecurityConfiguration:
+    Type: 'AWS::EMR::SecurityConfiguration'
+    Properties:
+      Name: LF-EMR-RT-SecurityConfiguration
+      SecurityConfiguration:
+        AuthorizationConfiguration:
+          IAMConfiguration:
+            EnableApplicationScopedIAMRole: true
+            ApplicationScopedIAMRoleConfiguration:
+              PropagateSourceIdentity: true
+          LakeFormationConfiguration:
+            AuthorizedSessionTagValue: Amazon EMR
+  LFRTA1Role:
+    Type: 'AWS::IAM::Role'
+    DependsOn:
+      - LFEMRRTInstanceProfileRole
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Join 
+                - ''
+                - - 'arn:aws:iam::'
+                  - !Ref 'AWS::AccountId'
+                  - ':role/LF-EMR-RT-InstanceProfile-Role'
+            Action:
+              - 'sts:AssumeRole'
+              - 'sts:TagSession'
+              - 'sts:SetSourceIdentity'
+      Policies:
+        - PolicyName: LF-RT-App1-Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'lakeformation:GetDataAccess'
+                  - 'glue:Get*'
+                  - 'glue:Create*'
+                  - 'glue:Update*'
+                Resource: '*'
+              - Effect: Allow
+                Action: 's3:*'
+                Resource:
+                  - !Join 
+                    - ''
+                    - - 'arn:aws:s3:::lf-workshop-'
+                      - !Ref 'AWS::AccountId'
+                      - /*
+                  - !Join 
+                    - ''
+                    - - 'arn:aws:s3:::lf-workshop-'
+                      - !Ref 'AWS::AccountId'
+      RoleName: ApplicationReadOnlyRuntimeRole
+  LFRTA2Role:
+    Type: 'AWS::IAM::Role'
+    DependsOn:
+      - LFEMRRTInstanceProfileRole
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Join 
+                - ''
+                - - 'arn:aws:iam::'
+                  - !Ref 'AWS::AccountId'
+                  - ':role/LF-EMR-RT-InstanceProfile-Role'
+            Action:
+              - 'sts:AssumeRole'
+              - 'sts:TagSession'
+              - 'sts:SetSourceIdentity'
+      Policies:
+        - PolicyName: LF-RT-App2-Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'lakeformation:GetDataAccess'
+                  - 'glue:Get*'
+                  - 'glue:Create*'
+                  - 'glue:Update*'
+                Resource: '*'
+              - Effect: Allow
+                Action: 's3:*'
+                Resource:
+                  - !Join 
+                    - ''
+                    - - 'arn:aws:s3:::lf-workshop-'
+                      - !Ref 'AWS::AccountId'
+                      - /*
+                  - !Join 
+                    - ''
+                    - - 'arn:aws:s3:::lf-workshop-'
+                      - !Ref 'AWS::AccountId'
+      RoleName: ApplicationReadWriteRuntimeRole
+  EMRRTCluster:
+    Type: 'AWS::EMR::Cluster'
+    DependsOn:
+      - LFEMRRTSecurityConfiguration
+      - LFEMRRTInstanceProfileRole
+      - LFEMRRTInstanceProfile
+    Properties:
+      Instances:
+        MasterInstanceGroup:
+          InstanceCount: 1
+          InstanceType: !Ref InstanceType
+          Market: ON_DEMAND
+          Name: cfnMaster
+        CoreInstanceGroup:
+          InstanceCount: 1
+          InstanceType: !Ref InstanceType
+          Market: ON_DEMAND
+          Name: cfnCore
+        Ec2SubnetId: !Ref VPCPublicSubnet
+        Ec2KeyName: !Ref EC2KeyPair
+      BootstrapActions:
+        - Name: setup-steps-scripts
+          ScriptBootstrapAction:
+            Path: >-
+              s3://aws-data-analytics-workshops/lake-formation-workshop/scripts/setupStepsScript.sh
+            Args:
+              - !Join 
+                - ''
+                - - lf-workshop-
+                  - !Ref 'AWS::AccountId'
+      Name: LF-RT-EMRCluster
+      Applications:
+        - Name: Hadoop
+        - Name: Spark
+        - Name: Hive
+      JobFlowRole: !Ref LFEMRRTInstanceProfile
+      ServiceRole: !Ref LFEMRRTRole
+      ReleaseLabel: !Ref ReleaseLabel
+      SecurityConfiguration: !Ref LFEMRRTSecurityConfiguration
+      VisibleToAllUsers: true
+      LogUri: !Join 
+        - ''
+        - - 's3://lf-workshop-'
+          - !Ref 'AWS::AccountId'
+          - /emrlogs
+Outputs:
+  ConsoleIAMLoginUrl:
+    Description: Console IAM Login URL to try out different users
+    Value: !Join 
+      - ''
+      - - 'https://'
+        - !Ref 'AWS::AccountId'
+        - .signin.aws.amazon.com/console
+  ClusterId:
+    Description: EMR Cluster ID
+    Value: !Ref EMRRTCluster
+  ApplicationReadOnlyRuntimeRole:
+    Description: Application ReadOnly Runtime Role
+    Value: !Join 
+      - ''
+      - - 'arn:aws:iam::'
+        - !Ref 'AWS::AccountId'
+        - ':role/'
+        - !Ref LFRTA1Role
+  ApplicationReadWriteRuntimeRole:
+    Description: Application ReadWrite Runtime Role
+    Value: !Join 
+      - ''
+      - - 'arn:aws:iam::'
+        - !Ref 'AWS::AccountId'
+        - ':role/'
+        - !Ref LFRTA2Role
+  LFWBucketName:
+    Description: LF Workshop Bucket Name
+    Value: !Join 
+      - ''
+      - - lf-workshop-
+        - !Ref 'AWS::AccountId'
+  EMRStepUser:
+    Description: EMR Step User
+    Value: !Ref EMRStepUser
+  EMRStepUserPassword:
+    Description: Console password for EMR Step User
+    Value: !Ref EMRStepUserPassword
+  AWSAccountID:
+    Description: AWS Account ID
+    Value: !Ref 'AWS::AccountId'

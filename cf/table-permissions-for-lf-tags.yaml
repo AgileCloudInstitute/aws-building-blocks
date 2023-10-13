@@ -1,0 +1,22 @@
+Description: Assign permissions to alter table to add LF-Tags
+Parameters:
+  CFNDatabaseName:
+    Type: String
+    Default: tpc
+Resources:
+ #Add the ALTER permission to the preexisting permissions for the dl_tpc_customer table
+  LFTagsPermissionsForTable:
+    Type: AWS::LakeFormation::PrincipalPermissions
+    Properties: 
+      Catalog: !Ref AWS::AccountId
+      Permissions:  
+        - "ALTER" 
+      PermissionsWithGrantOption:  
+        - "ALTER" 
+      Principal: 
+        DataLakePrincipalIdentifier: "arn:aws:iam::555344254085:user/lf-data-admin"
+      Resource: 
+        Table:
+          CatalogId: !Ref AWS::AccountId
+          DatabaseName: !Ref CFNDatabaseName
+          Name: "dl_tpc_customer"
