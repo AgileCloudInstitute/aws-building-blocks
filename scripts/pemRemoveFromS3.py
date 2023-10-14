@@ -66,6 +66,16 @@ def find(d, tag):
     if tag in d:
         yield d[tag]
 
+def getAcmUserHome():
+    if platform.system() == 'Windows':
+      acmUserHome = os.path.expanduser("~")+'/acm/'
+    elif platform.system() == 'Linux':
+      acmUserHome = '/usr/acm/'
+
+    if not os.path.exists(acmUserHome):
+      os.makedirs(acmUserHome, exist_ok=True) 
+    return acmUserHome
+
 def createConfigAndCredentialsAWS():
 #start
   # The following assumes that you only have one set of AWS credentials in keys.yaml, and that they have the key names given below.  
@@ -73,7 +83,8 @@ def createConfigAndCredentialsAWS():
     osChar = '\\'
   else:
     osChar = '/'
-  keyFile = os.path.expanduser('~')+osChar+'acm'+osChar+'keys'+osChar+'starter'+osChar+'keys.yaml'
+  acmUserHome = getAcmUserHome()
+  keyFile = acmUserHome+osChar+'keys'+osChar+'starter'+osChar+'keys.yaml'
   print("keyFile is: ", keyFile)
   if os.path.isfile(keyFile):
     print(keyFile, " is a file. ") 
@@ -102,7 +113,7 @@ def createConfigAndCredentialsAWS():
       out_file.write("[default]\n")
       out_file.write(access_key)
       out_file.write(secret_key)
-  acmConfigFile = os.path.expanduser('~')+osChar+'acm'+osChar+'keys'+osChar+'starter'+osChar+'config.yaml'
+  acmConfigFile = acmUserHome+osChar+'keys'+osChar+'starter'+osChar+'config.yaml'
   print("acmConfigFile is: ", acmConfigFile)
   if os.path.isfile(acmConfigFile):
     print(acmConfigFile, " is a file. ") 
