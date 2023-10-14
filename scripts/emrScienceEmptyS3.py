@@ -92,7 +92,7 @@ def createConfigAndCredentialsAWS():
       out_file.write(access_key)
       out_file.write(secret_key)
   acmConfigFile = acmUserHome+osChar+'keys'+osChar+'starter'+osChar+'config.yaml'
-   print("acmConfigFile is: ", acmConfigFile)
+  print("acmConfigFile is: ", acmConfigFile)
   if os.path.isfile(acmConfigFile):
     print(acmConfigFile, " is a file. ") 
   stream = open(acmConfigFile, 'r')
