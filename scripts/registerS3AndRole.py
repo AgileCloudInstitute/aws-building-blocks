@@ -682,6 +682,8 @@ def getErrorString():
 
 #The following function will set all the values for the returned properties
 def processInputArgs(inputArgs):
+    print("inside processInputArgs()")
+    print("inputArgs contains: ", inputArgs)
     n=-1
     n2=-2
     role = ""
@@ -695,13 +697,16 @@ def processInputArgs(inputArgs):
       n2=3
     else:
       getErrorString()
+    print("got regCmd. ")
     if (inputArgs[2].startswith('role=')) and (inputArgs[1]=='reg'):
       role = (inputArgs[2])[5:]
     else:
       if (inputArgs[2].startswith('role=')) and (not inputArgs[1]=='reg'):
         getErrorString()
+    print("got role.")
     if (inputArgs[n].startswith('bucket=')):
       bucket = (inputArgs[n])[7:]
+      print("raw bucket is: ", bucket)
       if "$awsAccountId" in bucket:
         accountNumber = getAccount()
         print("In processInputArgs() bucket before transform is: ", bucket2)
@@ -710,8 +715,10 @@ def processInputArgs(inputArgs):
         print("In processInputArgs() bucket after transform is: ", bucket2)
     else:
       getErrorString()
+    print("passed bucket.")
     if (len(inputArgs) == 4): #Avoid error related to index not found
       if (inputArgs[n2].startswith('bucket2=')):
+        print("raw bucket2 is: ", bucket2)
         bucket2 = (inputArgs[n2])[8:]
         if "$awsAccountId" in bucket2:
           accountNumber = getAccount()
@@ -719,6 +726,7 @@ def processInputArgs(inputArgs):
           print("In processInputArgs() accountNumber before transform is: ", accountNumber)
           bucket2 = bucket2.replace("$awsAccountId",accountNumber)
           print("In processInputArgs() bucket2 after transform is: ", bucket2)
+    print("finished with inputArgs.  About to return.")
     return regCmd, role, bucket, bucket2
 
 def checkRegistrationStatus(bucketName, regCmd, counter = 0):
