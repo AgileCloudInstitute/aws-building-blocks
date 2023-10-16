@@ -29,7 +29,7 @@ def getCurrentRegion(cmd):
   else:
     logString = "process.returncode is not zero.  Halting program so you can diagnose the root cause of the problem.  "
     print(logString)
-    sys.exit
+    sys.exit(1)
 
 def getAccount(cmd='aws sts get-caller-identity'):
   logString = "About to run get account id command: "+cmd
@@ -522,7 +522,7 @@ def runEmptyS3BucketCommand(cmd):
   else:
     logString = "process.returncode is not zero.  Halting program so you can diagnose the root cause of the problem.  "
     print(logString)
-    sys.exit
+    sys.exit(1)
 
 
 def isS3Registered(cmd):
@@ -704,7 +704,10 @@ def processInputArgs(inputArgs):
       bucket = (inputArgs[n])[7:]
       if "$awsAccountId" in bucket:
         accountNumber = getAccount()
+        print("In processInputArgs() bucket before transform is: ", bucket2)
+        print("In processInputArgs() accountNumber before transform is: ", accountNumber)
         bucket = bucket.replace("$awsAccountId",accountNumber)
+        print("In processInputArgs() bucket after transform is: ", bucket2)
     else:
       getErrorString()
     if (len(inputArgs) == 4): #Avoid error related to index not found
@@ -712,7 +715,10 @@ def processInputArgs(inputArgs):
         bucket2 = (inputArgs[n2])[8:]
         if "$awsAccountId" in bucket2:
           accountNumber = getAccount()
+          print("In processInputArgs() bucket2 before transform is: ", bucket2)
+          print("In processInputArgs() accountNumber before transform is: ", accountNumber)
           bucket2 = bucket2.replace("$awsAccountId",accountNumber)
+          print("In processInputArgs() bucket2 after transform is: ", bucket2)
     return regCmd, role, bucket, bucket2
 
 def checkRegistrationStatus(bucketName, regCmd, counter = 0):
