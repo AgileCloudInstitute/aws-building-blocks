@@ -707,7 +707,7 @@ def processInputArgs(inputArgs):
     if (inputArgs[n].startswith('bucket=')):
       bucket = (inputArgs[n])[7:]
       print("raw bucket is: ", bucket)
-      if "$awsAccountId" in bucket:
+      if "$awsAccountId" in inputArgs[n]:
         accountNumber = getAccount()
         print("In processInputArgs() bucket before transform is: ", bucket2)
         print("In processInputArgs() accountNumber before transform is: ", accountNumber)
@@ -720,7 +720,7 @@ def processInputArgs(inputArgs):
       if (inputArgs[n2].startswith('bucket2=')):
         print("raw bucket2 is: ", bucket2)
         bucket2 = (inputArgs[n2])[8:]
-        if "$awsAccountId" in bucket2:
+        if "$awsAccountId" in inputArgs[n2]:
           accountNumber = getAccount()
           print("In processInputArgs() bucket2 before transform is: ", bucket2)
           print("In processInputArgs() accountNumber before transform is: ", accountNumber)
