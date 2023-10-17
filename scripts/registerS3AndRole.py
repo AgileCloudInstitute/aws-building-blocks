@@ -681,9 +681,10 @@ def getErrorString():
   sys.exit(1)
 
 #The following function will set all the values for the returned properties
-def processInputArgs(inputArgs):
+def processInputArgs(inputArgs, accountNumber):
     print("inside processInputArgs()")
     print("inputArgs contains: ", inputArgs)
+    print("accountNumber is: ", accountNumber)
     n=-1
     n2=-2
     role = ""
@@ -707,8 +708,8 @@ def processInputArgs(inputArgs):
     if (inputArgs[n].startswith('bucket=')):
       bucket = (inputArgs[n])[7:]
       print("raw bucket is: ", bucket)
+      print("inputArgs[n] is: ", inputArgs[n])
       if "$awsAccountId" in inputArgs[n]:
-        accountNumber = getAccount()
         print("In processInputArgs() bucket before transform is: ", bucket2)
         print("In processInputArgs() accountNumber before transform is: ", accountNumber)
         bucket = bucket.replace("$awsAccountId",accountNumber)
@@ -719,9 +720,9 @@ def processInputArgs(inputArgs):
     if (len(inputArgs) == 4): #Avoid error related to index not found
       if (inputArgs[n2].startswith('bucket2=')):
         print("raw bucket2 is: ", bucket2)
+        print("inputArgs[n2] is: ", inputArgs[n2])
         bucket2 = (inputArgs[n2])[8:]
         if "$awsAccountId" in inputArgs[n2]:
-          accountNumber = getAccount()
           print("In processInputArgs() bucket2 before transform is: ", bucket2)
           print("In processInputArgs() accountNumber before transform is: ", accountNumber)
           bucket2 = bucket2.replace("$awsAccountId",accountNumber)
@@ -810,12 +811,20 @@ def deleteAllFileSystemsThatHaveTag(getFsCmd, account):
 ####################################################################################################
 ### Set Up
 ####################################################################################################
+
 createConfigAndCredentialsAWS()
 accountNumber = getAccount()
-regCmd, roleName, bucketName, bucket2Name= processInputArgs(inputArgs)
+print("at start of registerS3AndRole.py, accountNumber is: ", accountNumber)
+regCmd, roleName, bucketName, bucket2Name= processInputArgs(inputArgs, accountNumber)
 print("regCmd 3 is: ", regCmd)
-print("bucketName is: ", bucketName)
-print("bucket2Name is: ", bucket2Name)
+print("bucketName returned from processInputArgs() is: ", bucketName)
+print("bucket2Name returned from processInputArgs() is: ", bucket2Name)
+if accountNumber not in bucketName:
+  bucketName = bucketName+accountNumber
+if accountNumber not in bucket2Name:
+  bucket2Name = bucket2Name+accountNumber
+print("bucketName after cleaning is: ", bucketName)
+print("bucket2Name after cleaning is: ", bucket2Name)
 
 ####################################################################################################
 ### Register or De-Register bucket and role
@@ -866,16 +875,15 @@ else:
 ### Delete File Systems
 ####################################################################################################
   getFsCmd="aws efs describe-file-systems"
-  account=getAccount()
-  deleteAllFileSystemsThatHaveTag(getFsCmd, account)
+  deleteAllFileSystemsThatHaveTag(getFsCmd, accountNumber)
   print("Sleep 60 seconds before checking again to confirm file systems are deleted. ")
   time.sleep(60)
   print("About to check again to confirm file systems are deleted. ")
-  fileSystemIds=getFileSystems(getFsCmd,account,"after")
+  fileSystemIds=getFileSystems(getFsCmd,accountNumber,"after")
   print("5 fileSystemIds contains: ", fileSystemIds)
   if fileSystemIds != None:
     print("About to delete file systems again, given that some still exist.")
-    deleteAllFileSystemsThatHaveTag(getFsCmd, account)
+    deleteAllFileSystemsThatHaveTag(getFsCmd, accountNumber)
 
 ####################################################################################################
 ### Delete security group rules a second time in case latency caused problems in previous attempt
