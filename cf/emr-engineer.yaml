@@ -1,22 +1,22 @@
 Description: >-
   Amazon EMR cluster with AWS Lake Formation integration with Runtime Role
-Metadata:
-  'AWS::CloudFormation::Interface':
-    ParameterGroups:
-      - Label:
-          default: Amazon EMR Cluster Configuration
-        Parameters:
-          - ReleaseLabel
-          - InstanceType
-          - VPCPublicSubnet
-          - EC2KeyPair
-    ParameterLabels:
-      ReleaseLabel:
-        default: EMR Release Label
-      VPCPublicSubnet:
-        default: VPC Public Subnet
-      EC2KeyPair:
-        default: EC2 Key Pair
+#Metadata:
+#  'AWS::CloudFormation::Interface':
+#    ParameterGroups:
+#      - Label:
+#          default: Amazon EMR Cluster Configuration
+#        Parameters:
+#          - ReleaseLabel
+#          - InstanceType
+#          - VPCPublicSubnet
+#          - EC2KeyPair
+#    ParameterLabels:
+#      ReleaseLabel:
+#        default: EMR Release Label
+#      VPCPublicSubnet:
+#        default: VPC Public Subnet
+#      EC2KeyPair:
+#        default: EC2 Key Pair
 Mappings:
   AWSRegionAMI:
     us-east-1:
@@ -44,62 +44,61 @@ Parameters:
   VPCPublicSubnet:
     Type: 'AWS::EC2::Subnet::Id'
     Description: >-
-      Public Subnet to be used for Amazon EMR cluster, please choose either
-      LF-Workshop-PublicSubnetOne or LF-Workshop-PublicSubnetTwo
+      Public Subnet from the lakehouse-core system to be used for Amazon EMR cluster.
     AllowedPattern: .+
   InstanceType:
     Type: String
     Default: m4.xlarge
     Description: Amazon EMR Cluster Instance Type
-  EMRStepUserPassword:
-    Type: String
-    Default: Password2!
-    Description: Console password for Emr Step User.
+#  EMRStepUserPassword: 
+#    Type: String
+#    Default: Password2!
+#    Description: Console password for Emr Step User.
 Resources:
-  EMRStepUser:
-    Type: 'AWS::IAM::User'
-    Properties:
-      Path: /
-      LoginProfile:
-        Password: !Ref EMRStepUserPassword
-        PasswordResetRequired: false
-      Policies:
-        - PolicyName: LF-Athena-Query-Output-Policy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 's3:Put*'
-                  - 's3:Get*'
-                  - 's3:List*'
-                Resource:
-                  - !Join 
-                    - ''
-                    - - 'arn:aws:s3:::lf-workshop-'
-                      - !Ref 'AWS::AccountId'
-                      - /emrlogs*
-                  - !Join 
-                    - ''
-                    - - 'arn:aws:s3:::lf-workshop-'
-                      - !Ref 'AWS::AccountId'
-                      - /athena-results/*
-        - PolicyName: LF-EMR-Policy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'lakeformation:StartQueryPlanning'
-                  - 'lakeformation:GetQueryState'
-                  - 'lakeformation:GetWorkUnits'
-                  - 'lakeformation:GetWorkUnitResults'
-                  - 'elasticmapreduce:*'
-                Resource: '*'
-      ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/AmazonAthenaFullAccess'
-        - 'arn:aws:iam::aws:policy/AWSCloudShellFullAccess'
-      UserName: emr-step-user
+#  EMRStepUser:
+#    Type: 'AWS::IAM::User'
+#    Properties:
+#      Path: /
+#      LoginProfile:
+#        Password: !Ref EMRStepUserPassword
+#        PasswordResetRequired: false
+#      Policies:
+#        - PolicyName: LF-Athena-Query-Output-Policy
+#          PolicyDocument:
+#            Version: 2012-10-17
+#            Statement:
+#              - Effect: Allow
+#                Action:
+#                  - 's3:Put*'
+#                  - 's3:Get*'
+#                  - 's3:List*'
+#                Resource:
+#                  - !Join 
+#                    - ''
+#                    - - 'arn:aws:s3:::lf-workshop-'
+#                      - !Ref 'AWS::AccountId'
+#                      - /emrlogs*
+#                  - !Join 
+#                    - ''
+#                    - - 'arn:aws:s3:::lf-workshop-'
+#                      - !Ref 'AWS::AccountId'
+#                      - /athena-results/*
+#        - PolicyName: LF-EMR-Policy
+#          PolicyDocument:
+#            Version: 2012-10-17
+#            Statement:
+#              - Effect: Allow
+#                Action:
+#                  - 'lakeformation:StartQueryPlanning'
+#                  - 'lakeformation:GetQueryState'
+#                  - 'lakeformation:GetWorkUnits'
+#                  - 'lakeformation:GetWorkUnitResults'
+#                  - 'elasticmapreduce:*'
+#                Resource: '*'
+#      ManagedPolicyArns:
+#        - 'arn:aws:iam::aws:policy/AmazonAthenaFullAccess'
+#        - 'arn:aws:iam::aws:policy/AWSCloudShellFullAccess'
+#      UserName: emr-step-user
   LFEMRRTRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -501,18 +500,12 @@ Outputs:
         - !Ref 'AWS::AccountId'
         - ':role/'
         - !Ref LFRTA2Role
-  LFWBucketName:
-    Description: LF Workshop Bucket Name
-    Value: !Join 
-      - ''
-      - - lf-workshop-
-        - !Ref 'AWS::AccountId'
-  EMRStepUser:
-    Description: EMR Step User
-    Value: !Ref EMRStepUser
-  EMRStepUserPassword:
-    Description: Console password for EMR Step User
-    Value: !Ref EMRStepUserPassword
+#  EMRStepUser:
+#    Description: EMR Step User
+#    Value: !Ref EMRStepUser
+#  EMRStepUserPassword:
+#    Description: Console password for EMR Step User
+#    Value: !Ref EMRStepUserPassword
   AWSAccountID:
     Description: AWS Account ID
     Value: !Ref 'AWS::AccountId'

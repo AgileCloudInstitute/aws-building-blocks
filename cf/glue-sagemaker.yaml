@@ -8,7 +8,9 @@ Parameters:
     AllowedPattern: '[a-zA-Z][a-zA-Z0-9_-]*'
   VPC:
     Type: 'AWS::EC2::VPC::Id'
-    Description: 'VPC to be used for Amazon SageMaker Studio , please choose LF-Workshop-VPC'
+    Description: >-
+      VPC to be used for Amazon SageMaker Studio , please choose the VPC created by 
+      the lf-foundation.yaml template and given as an output variable of that template.
     AllowedPattern: .+
   PrivateSubnet:
     Type: 'AWS::EC2::Subnet::Id'

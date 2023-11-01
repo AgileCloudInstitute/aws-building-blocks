@@ -15,13 +15,89 @@ Mappings:
     AutoHibernateTimeout:
       Name: 30
 Parameters:
+#  GlobalAdminName:
+#    Type: String
+#    Default: DataLakeAdministrativeUser1
+#    Description: Name of the AWS administrator user that will run these cloud formation templates.
+  VPCName:
+    Type: String
+    Default: LF-Workshop-VPC
+    Description: Name of the VPC from which the Lake House will be orchestrated.
+  PrivateSubnetName:
+    Type: String
+    Default: LF-Workshop-PrivateSubnet
+    Description: Name of the private subnet.
+  PublicSubnet1Name:
+    Type: String
+    Default: LF-Workshop-PublicSubnetOne
+    Description: Name of the first public subnet.
+  PublicSubnet2Name:
+    Type: String
+    Default: LF-Workshop-PublicSubnetTwo
+    Description: Name of the second public subnet.
+  InternetGatewayName:
+    Type: String
+    Default: LF-Workshop-IG
+    Description: Name of the internet gateway.
+  NATGatewayName:
+    Type: String
+    Default: LF-NAT-Gateway
+    Description: Name of the NAT gateway.
+  NATRouteTableName:
+    Type: String
+    Default: LF-NAT-RouteTable
+    Description: Name of the route table for the NAT gateway.
+  GlueRoleName:
+    Type: String
+    Default: LF-GlueServiceRole
+    Description: Name of role for Glue service.
+  GlueDataAnalystRoleName:
+    Type: String
+    Default: DA-GlueServiceRole
+    Description: Name of the data analysts role for glue service.
+  GlueDataEngineerRoleName:
+    Type: String
+    Default: DE-GlueServiceRole
+    Description: Name of the data engineer role for glue service
+  EC2BackupRestoreName:
+    Type: String
+    Default: EC2-DB-Loader
+    Description: Name of the EC2 instance used for backup and restore.
+  CrawlerName:
+    Type: String
+    Default: TPC Crawler
+    Description: Name of the Glue Crawler that will be created.
+#  DataAdministratorUserName:
+#    Type: String
+#    Default: lf-data-admin
+#    Description: Name of a user who will be the data administrator.
+#  DataScienceUserName:
+#    Type: String
+#    Default: lf-data-scientist
+#    Description: Name of a user who will be a data scientist.
+#  DataAnalystUserName:
+#    Type: String
+#    Default: lf-data-analyst
+#    Description: Name of a user who will be a data analyst.
+#  DataEngineerUserName:
+#    Type: String
+#    Default: lf-data-engineer
+#    Description: Name of a user who will be a data engineer.
+  LakeFormationDemoBucketName:
+    Type: String
+    Default: lf-workshop
+    Description: Name of s3 bucket into which resources will be placed.
+  DataLakeBucketName:
+    Type: String
+    Default: lf-data-lake
+    Description: Name of s3 bucket into which data lake data will be placed.
   TPCDBName:
     Type: String
     Default: tpc
     AllowedValues:
       - tpc
     Description: Name of the database that will be created.
-  DBMasterUser:
+  DBMasterUser: 
     Type: String
     Default: tpcadmin
     Description: Master username for TPC database.
@@ -52,7 +128,7 @@ Resources:
       EnableDnsHostnames: 'true'
       Tags:
         - Key: Name
-          Value: LF-Workshop-VPC
+          Value: !Ref VPCName
   PrivateSubnet:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -68,7 +144,7 @@ Resources:
       VpcId: !Ref LakeFormationVPC
       Tags:
         - Key: Name
-          Value: LF-Workshop-PrivateSubnet
+          Value: !Ref PrivateSubnetName
   PublicSubnetOne:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -84,7 +160,7 @@ Resources:
       VpcId: !Ref LakeFormationVPC
       Tags:
         - Key: Name
-          Value: LF-Workshop-PublicSubnetOne
+          Value: !Ref PublicSubnet1Name
   PublicSubnetTwo:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -100,13 +176,13 @@ Resources:
       VpcId: !Ref LakeFormationVPC
       Tags:
         - Key: Name
-          Value: LF-Workshop-PublicSubnetTwo
+          Value: !Ref PublicSubnet2Name
   InternetGateway:
     Type: 'AWS::EC2::InternetGateway'
     Properties:
       Tags:
         - Key: Name
-          Value: LF-Workshop-IG
+          Value: !Ref InternetGatewayName
   VPCGatewayAttachment:
     Type: 'AWS::EC2::VPCGatewayAttachment'
     Properties:
@@ -147,14 +223,14 @@ Resources:
         - AllocationId
       Tags:
         - Key: Name
-          Value: LF-NAT-Gateway
+          Value: !Ref NATGatewayName
   NATGatewayRouteTable:
     Type: 'AWS::EC2::RouteTable'
     Properties:
       VpcId: !Ref LakeFormationVPC
       Tags:
         - Key: Name
-          Value: LF-NAT-RouteTable
+          Value: !Ref NATRouteTableName
   NATGatewayRoute:
     Type: 'AWS::EC2::Route'
     Properties:
@@ -198,7 +274,7 @@ Resources:
         - 'arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole'
         - 'arn:aws:iam::aws:policy/AmazonKinesisFullAccess'
       Policies:
-        - PolicyName: LF-Data-Lake-Storage-Policy
+        - PolicyName: LakeFormation-Data-Lake-Storage-Policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -226,13 +302,13 @@ Resources:
                   - !Join 
                     - ''
                     - - 'arn:aws:s3:::'
-                      - !Ref LFWorkshopBucket
+                      - !Ref LakeFormationDemoBucket
                       - /*
                   - !Join 
                     - ''
                     - - 'arn:aws:s3:::'
-                      - !Ref LFWorkshopBucket
-        - PolicyName: LF-DataAccess-Policy
+                      - !Ref LakeFormationDemoBucket
+        - PolicyName: LakeFormation-DataAccess-Policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -241,7 +317,7 @@ Resources:
                   - 'lakeformation:GetDataAccess'
                   - 'lakeformation:GrantPermissions'
                 Resource: '*'
-        - PolicyName: LF-Workflow-Policy
+        - PolicyName: LakeFormation-Workflow-Policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -253,13 +329,13 @@ Resources:
                     - ''
                     - - 'arn:aws:iam::'
                       - !Ref 'AWS::AccountId'
-                      - ':role/LF-GlueServiceRole'
+                      - !Sub ':role/${GlueRoleName}'
                   - !Join 
                     - ''
                     - - 'arn:aws:iam::'
                       - !Ref 'AWS::AccountId'
                       - ':role/LakeFormationWorkflowRole'
-      RoleName: LF-GlueServiceRole
+      RoleName: !Ref GlueRoleName
   DataAnalystGlueServiceRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -305,12 +381,12 @@ Resources:
                   - !Join
                     - ''
                     - - 'arn:aws:s3:::'
-                      - !Ref LFWorkshopBucket
+                      - !Ref LakeFormationDemoBucket
                       - /*
                   - !Join
                     - ''
                     - - 'arn:aws:s3:::'
-                      - !Ref LFWorkshopBucket
+                      - !Ref LakeFormationDemoBucket
         - PolicyName: DA-DataAccess-Policy
           PolicyDocument:
             Version: 2012-10-17
@@ -332,13 +408,13 @@ Resources:
                     - ''
                     - - 'arn:aws:iam::'
                       - !Ref 'AWS::AccountId'
-                      - ':role/DA-GlueServiceRole'
+                      - !Sub ':role/${GlueDataAnalystRoleName}'
                   - !Join
                     - ''
                     - - 'arn:aws:iam::'
                       - !Ref 'AWS::AccountId'
                       - ':role/LakeFormationWorkflowRole'
-      RoleName: DA-GlueServiceRole
+      RoleName: !Ref GlueDataAnalystRoleName
   DataEngineerGlueServiceRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -384,12 +460,12 @@ Resources:
                   - !Join
                     - ''
                     - - 'arn:aws:s3:::'
-                      - !Ref LFWorkshopBucket
+                      - !Ref LakeFormationDemoBucket
                       - /*
                   - !Join
                     - ''
                     - - 'arn:aws:s3:::'
-                      - !Ref LFWorkshopBucket
+                      - !Ref LakeFormationDemoBucket
         - PolicyName: DE-DataAccess-Policy
           PolicyDocument:
             Version: 2012-10-17
@@ -411,13 +487,13 @@ Resources:
                     - ''
                     - - 'arn:aws:iam::'
                       - !Ref 'AWS::AccountId'
-                      - ':role/DE-GlueServiceRole'
+                      - !Sub ':role/${GlueDataEngineerRoleName}'
                   - !Join
                     - ''
                     - - 'arn:aws:iam::'
                       - !Ref 'AWS::AccountId'
                       - ':role/LakeFormationWorkflowRole'
-      RoleName: DE-GlueServiceRole
+      RoleName: !Ref GlueDataEngineerRoleName
   AmazonKinesisFirehoseFullAccess:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -432,7 +508,7 @@ Resources:
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/AmazonKinesisFirehoseFullAccess'
       Policies:
-        - PolicyName: LF-Stream-Data-Storage-Policy
+        - PolicyName: LakeFormation-Stream-Data-Storage-Policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -449,7 +525,7 @@ Resources:
                     - ''
                     - - 'arn:aws:s3:::'
                       - !Ref DataLakeBucket
-      RoleName: LF-KinesisServiceRole
+      RoleName: LakeHouse-KinesisServiceRole
   DataLakeBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
@@ -458,9 +534,9 @@ Resources:
           - ObjectOwnership: BucketOwnerPreferred
       BucketName: !Join 
         - '-'
-        - - lf-data-lake
+        - - !Ref DataLakeBucketName
           - !Ref 'AWS::AccountId'
-  LFWorkshopBucket:
+  LakeFormationDemoBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
       OwnershipControls:
@@ -468,209 +544,209 @@ Resources:
           - ObjectOwnership: BucketOwnerPreferred
       BucketName: !Join 
         - '-'
-        - - lf-workshop
+        - - !Ref LakeFormationDemoBucketName
           - !Ref 'AWS::AccountId'
-  LFUsersPassword:
-    Type: 'AWS::SecretsManager::Secret'
-    Properties:
-      Description: Secret password for all workshop users
-      Name: !Sub '${AWS::StackName}-lf-users-credentials'
-      GenerateSecretString:
-        SecretStringTemplate: '{"username":"all-lf-users"}'
-        GenerateStringKey: password
-        PasswordLength: 16
-        ExcludeCharacters: '"@/\'
+#  LFUsersPassword:
+#    Type: 'AWS::SecretsManager::Secret'
+#    Properties:
+#      Description: Secret password for all users created by this template
+#      Name: !Sub '${AWS::StackName}-users-credentials'
+#      GenerateSecretString:
+#        SecretStringTemplate: '{"username":"all-lakeformation-users"}'
+#        GenerateStringKey: password
+#        PasswordLength: 16
+#        ExcludeCharacters: '"@/\'
   ADFSUsersPassword:
     Type: 'AWS::SecretsManager::Secret'
     Properties:
       Description: Secret password for all ADFS users
       Name: !Sub '${AWS::StackName}-adfs-users-credentials'
       SecretString: '{"username":"all-windows-users","password":"Password1!"}'
-  DataAdminUser:
-    Type: 'AWS::IAM::User'
-    Properties:
-      Path: /
-      LoginProfile:
-        Password: !Sub '{{resolve:secretsmanager:${LFUsersPassword}::password}}'
-        PasswordResetRequired: false
-      Policies:
-        - PolicyName: LF-DataLake-Admin-Policy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action: 'iam:CreateServiceLinkedRole'
-                Resource: '*'
-                Condition:
-                  StringEquals:
-                    'iam:AWSServiceName': lakeformation.amazonaws.com
-              - Effect: Allow
-                Action:
-                  - 'iam:PutRolePolicy'
-                Resource: !Join 
-                  - ''
-                  - - 'arn:aws:iam::'
-                    - !Ref 'AWS::AccountId'
-                    - >-
-                      :role/aws-service-role/lakeformation.amazonaws.com/AWSServiceRoleForLakeFormationDataAccess
-              - Effect: Allow
-                Action: 'iam:PassRole'
-                Resource:
-                  - 'arn:aws:iam::*:role/LF-GlueServiceRole'
-        - PolicyName: LF-DataLake-Admin-RAM-Invitation-Policy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'ram:AcceptResourceShareInvitation'
-                  - 'ram:RejectResourceShareInvitation'
-                  - 'ec2:DescribeAvailabilityZones'
-                  - 'ram:EnableSharingWithAwsOrganization'
-                Resource: '*'
-      ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/AWSLakeFormationDataAdmin'
-        - 'arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess'
-        - 'arn:aws:iam::aws:policy/AWSLakeFormationCrossAccountManager'
-        - 'arn:aws:iam::aws:policy/AWSCloudFormationFullAccess'
-      UserName: lf-data-admin
-
-  # add DatalakeAdmin as a DL Admin September 2023
-  LFDataLakeSettings:
-    DependsOn: DataAdminUser
-    Type: AWS::LakeFormation::DataLakeSettings
-    Properties:
-      Admins:
-        - DataLakePrincipalIdentifier: !GetAtt 'DataAdminUser.Arn'
-        - DataLakePrincipalIdentifier: "arn:aws:iam::555344254085:user/DataLakeAdministrativeUser1"
-      TrustedResourceOwners: []
-      CreateDatabaseDefaultPermissions: []
-      CreateTableDefaultPermissions: []
-      Parameters:
-        "CROSS_ACCOUNT_VERSION": "3"
-
-  DataScientistUser:
-    Type: 'AWS::IAM::User'
-    Properties:
-      Path: /
-      LoginProfile:
-        Password: !Sub '{{resolve:secretsmanager:${LFUsersPassword}::password}}'
-        PasswordResetRequired: false
-      Policies:
-        - PolicyName: LF-Athena-Query-Result-Policy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 's3:Put*'
-                  - 's3:Get*'
-                  - 's3:List*'
-                Resource:
-                  - !Join 
-                    - ''
-                    - - 'arn:aws:s3:::'
-                      - !Ref LFWorkshopBucket
-                      - /athena-results/*
-        - PolicyName: LF-Cell-Level-Filter-Policy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'lakeformation:StartQueryPlanning'
-                  - 'lakeformation:GetQueryState'
-                  - 'lakeformation:GetWorkUnits'
-                  - 'lakeformation:GetWorkUnitResults'
-                Resource: '*'
-      ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/AmazonAthenaFullAccess'
-        - 'arn:aws:iam::aws:policy/AmazonSageMakerFullAccess'
-      UserName: lf-data-scientist
-  DataAnalystUser:
-    Type: 'AWS::IAM::User'
-    Properties:
-      Path: /
-      LoginProfile:
-        Password: !Sub '{{resolve:secretsmanager:${LFUsersPassword}::password}}'
-        PasswordResetRequired: false
-      Policies:
-        - PolicyName: LF-Athena-Query-Result-Policy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 's3:Put*'
-                  - 's3:Get*'
-                  - 's3:List*'
-                Resource:
-                  - !Join 
-                    - ''
-                    - - 'arn:aws:s3:::'
-                      - !Ref LFWorkshopBucket
-                      - /athena-results/*
-        - PolicyName: LF-Athena-Run-Tagging-Query
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'lakeformation:StartQueryPlanning'
-                  - 'lakeformation:GetQueryState'
-                  - 'lakeformation:GetWorkUnits'
-                  - 'lakeformation:GetWorkUnitResults'
-                Resource: "*"
-        - PolicyName: LF-PassRole
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement: 
-              - Effect: Allow
-                Action: 'iam:PassRole'
-                Resource:
-                  - 'arn:aws:iam::*:role/DA-GlueServiceRole'
-      ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/AmazonAthenaFullAccess'
-        - 'arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess'
-        - 'arn:aws:iam::aws:policy/AmazonRedshiftDataFullAccess'
-        - 'arn:aws:iam::aws:policy/AmazonRedshiftFullAccess'
-        - 'arn:aws:iam::aws:policy/AmazonRedshiftQueryEditorV2FullAccess'
-      UserName: lf-data-analyst
-  DataEngineerUser:
-    Type: 'AWS::IAM::User'
-    Properties:
-      Path: /
-      LoginProfile:
-        Password: !Sub '{{resolve:secretsmanager:${LFUsersPassword}::password}}'
-        PasswordResetRequired: false
-      Policies:
-        - PolicyName: LF-Athena-Query-Result-Policy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 's3:Put*'
-                  - 's3:Get*'
-                  - 's3:List*'
-                Resource:
-                  - !Join 
-                    - ''
-                    - - 'arn:aws:s3:::'
-                      - !Ref LFWorkshopBucket
-                      - /athena-results/*
-        - PolicyName: LF-PassRole
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement: 
-              - Effect: Allow
-                Action: 'iam:PassRole'
-                Resource:
-                  - 'arn:aws:iam::*:role/DE-GlueServiceRole'
-      ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/AmazonAthenaFullAccess'
-        - 'arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess'
-      UserName: lf-data-engineer
+#  DataAdministratorUser:
+#    Type: 'AWS::IAM::User'
+#    Properties:
+#      Path: /
+#      LoginProfile:
+#        Password: !Sub '{{resolve:secretsmanager:${LFUsersPassword}::password}}'
+#        PasswordResetRequired: false
+#      Policies:
+#        - PolicyName: LakeFormation-DataLake-Admin-Policy
+#          PolicyDocument:
+#            Version: 2012-10-17
+#            Statement:
+#              - Effect: Allow
+#                Action: 'iam:CreateServiceLinkedRole'
+#                Resource: '*'
+#                Condition:
+#                  StringEquals:
+#                    'iam:AWSServiceName': lakeformation.amazonaws.com
+#              - Effect: Allow
+#                Action:
+#                  - 'iam:PutRolePolicy'
+#                Resource: !Join 
+#                  - ''
+#                  - - 'arn:aws:iam::'
+#                    - !Ref 'AWS::AccountId'
+#                    - >-
+#                      :role/aws-service-role/lakeformation.amazonaws.com/AWSServiceRoleForLakeFormationDataAccess
+#              - Effect: Allow
+#                Action: 'iam:PassRole'
+#                Resource:
+#                  - !Sub 'arn:aws:iam::*:role/${GlueRoleName}'
+#        - PolicyName: LakeFormation-DataLake-Admin-RAM-Invitation-Policy
+#          PolicyDocument:
+#            Version: 2012-10-17
+#            Statement:
+#              - Effect: Allow
+#                Action:
+#                  - 'ram:AcceptResourceShareInvitation'
+#                  - 'ram:RejectResourceShareInvitation'
+#                  - 'ec2:DescribeAvailabilityZones'
+#                  - 'ram:EnableSharingWithAwsOrganization'
+#                Resource: '*'
+#      ManagedPolicyArns:
+#        - 'arn:aws:iam::aws:policy/AWSLakeFormationDataAdmin'
+#        - 'arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess'
+#        - 'arn:aws:iam::aws:policy/AWSLakeFormationCrossAccountManager'
+#        - 'arn:aws:iam::aws:policy/AWSCloudFormationFullAccess'
+#      UserName: !Ref DataAdministratorUserName
+#
+#  # add DatalakeAdmin as a DL Admin September 2023
+#  LFDataLakeSettings:
+#    DependsOn: DataAdministratorUser
+#    Type: AWS::LakeFormation::DataLakeSettings
+#    Properties:
+#      Admins:
+#        - DataLakePrincipalIdentifier: !GetAtt 'DataAdministratorUser.Arn'
+#        - DataLakePrincipalIdentifier: !Sub "arn:aws:iam::${AWS::AccountId}:user/${GlobalAdminName}"
+#      TrustedResourceOwners: []
+#      CreateDatabaseDefaultPermissions: []
+#      CreateTableDefaultPermissions: []
+#      Parameters:
+#        "CROSS_ACCOUNT_VERSION": "3"
+#
+#  DataScienceUser:
+#    Type: 'AWS::IAM::User'
+#    Properties:
+#      Path: /
+#      LoginProfile:
+#        Password: !Sub '{{resolve:secretsmanager:${LFUsersPassword}::password}}'
+#        PasswordResetRequired: false
+#      Policies:
+#        - PolicyName: LakeFormation-Athena-Query-Result-Policy
+#          PolicyDocument:
+#            Version: 2012-10-17
+#            Statement:
+#              - Effect: Allow
+#                Action:
+#                  - 's3:Put*'
+#                  - 's3:Get*'
+#                  - 's3:List*'
+#                Resource:
+#                  - !Join 
+#                    - ''
+#                    - - 'arn:aws:s3:::'
+#                      - !Ref LakeFormationDemoBucket
+#                      - /athena-results/*
+#        - PolicyName: LakeFormation-Cell-Level-Filter-Policy
+#          PolicyDocument:
+#            Version: 2012-10-17
+#            Statement:
+#              - Effect: Allow
+#                Action:
+#                  - 'lakeformation:StartQueryPlanning'
+#                  - 'lakeformation:GetQueryState'
+#                  - 'lakeformation:GetWorkUnits'
+#                  - 'lakeformation:GetWorkUnitResults'
+#                Resource: '*'
+#      ManagedPolicyArns:
+#        - 'arn:aws:iam::aws:policy/AmazonAthenaFullAccess'
+#        - 'arn:aws:iam::aws:policy/AmazonSageMakerFullAccess'
+#      UserName: !Ref DataScienceUserName
+#  DataAnalystUser:
+#    Type: 'AWS::IAM::User'
+#    Properties:
+#      Path: /
+#      LoginProfile:
+#        Password: !Sub '{{resolve:secretsmanager:${LFUsersPassword}::password}}'
+#        PasswordResetRequired: false
+#      Policies:
+#        - PolicyName: LakeFormation-Athena-Query-Result-Policy
+#          PolicyDocument:
+#            Version: 2012-10-17
+#            Statement:
+#              - Effect: Allow
+#                Action:
+#                  - 's3:Put*'
+#                  - 's3:Get*'
+#                  - 's3:List*'
+#                Resource:
+#                  - !Join 
+#                    - ''
+#                    - - 'arn:aws:s3:::'
+#                      - !Ref LakeFormationDemoBucket
+#                      - /athena-results/*
+#        - PolicyName: LakeFormation-Athena-Run-Tagging-Query
+#          PolicyDocument:
+#            Version: 2012-10-17
+#            Statement:
+#              - Effect: Allow
+#                Action:
+#                  - 'lakeformation:StartQueryPlanning'
+#                  - 'lakeformation:GetQueryState'
+#                  - 'lakeformation:GetWorkUnits'
+#                  - 'lakeformation:GetWorkUnitResults'
+#                Resource: "*"
+#        - PolicyName: LakeFormation-PassRole
+#          PolicyDocument:
+#            Version: 2012-10-17
+#            Statement: 
+#              - Effect: Allow
+#                Action: 'iam:PassRole'
+#                Resource:
+#                  - !Sub 'arn:aws:iam::*:role/${GlueDataAnalystRoleName}'
+#      ManagedPolicyArns:
+#        - 'arn:aws:iam::aws:policy/AmazonAthenaFullAccess'
+#        - 'arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess'
+#        - 'arn:aws:iam::aws:policy/AmazonRedshiftDataFullAccess'
+#        - 'arn:aws:iam::aws:policy/AmazonRedshiftFullAccess'
+#        - 'arn:aws:iam::aws:policy/AmazonRedshiftQueryEditorV2FullAccess'
+#      UserName: !Ref DataAnalystUserName
+#  DataEngineerUser:
+#    Type: 'AWS::IAM::User'
+#    Properties:
+#      Path: /
+#      LoginProfile:
+#        Password: !Sub '{{resolve:secretsmanager:${LFUsersPassword}::password}}'
+#        PasswordResetRequired: false
+#      Policies:
+#        - PolicyName: LakeFormation-Athena-Query-Result-Policy
+#          PolicyDocument:
+#            Version: 2012-10-17
+#            Statement:
+#              - Effect: Allow
+#                Action:
+#                  - 's3:Put*'
+#                  - 's3:Get*'
+#                  - 's3:List*'
+#                Resource:
+#                  - !Join 
+#                    - ''
+#                    - - 'arn:aws:s3:::'
+#                      - !Ref LakeFormationDemoBucket
+#                      - /athena-results/*
+#        - PolicyName: LakeFormation-PassRole
+#          PolicyDocument:
+#            Version: 2012-10-17
+#            Statement: 
+#              - Effect: Allow
+#                Action: 'iam:PassRole'
+#                Resource:
+#                  - !Sub 'arn:aws:iam::*:role/${GlueDataEngineerRoleName}'
+#      ManagedPolicyArns:
+#        - 'arn:aws:iam::aws:policy/AmazonAthenaFullAccess'
+#        - 'arn:aws:iam::aws:policy/AWSGlueConsoleFullAccess'
+#      UserName: !Ref DataEngineerUserName
   EC2Role:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -725,7 +801,7 @@ Resources:
               s3://aws-data-analytics-workshops/lake-formation-workshop/sampledata/tripdata.csv
               /tmp/
             - 'aws s3 cp /tmp/tripdata.csv s3://'
-            - !Ref LFWorkshopBucket
+            - !Ref LakeFormationDemoBucket
             - |
               /glue/nyctaxi/
             - >
@@ -733,19 +809,19 @@ Resources:
               s3://aws-data-analytics-workshops/lake-formation-workshop/scripts/nyctaxi-csv-to-json.py
               /tmp/
             - 'aws s3 cp /tmp/nyctaxi-csv-to-json.py s3://'
-            - !Ref LFWorkshopBucket
+            - !Ref LakeFormationDemoBucket
             - |
               /glue/scripts/
 
       Tags:
         - Key: Name
-          Value: EC2-DB-Loader
+          Value: !Ref EC2BackupRestoreName
   GlueCrawler:
     Type: 'AWS::Glue::Crawler'
     Properties:
       DatabaseName: tpc
       Description: AWS Glue Crawler to crawl parquet data
-      Name: TPC Crawler
+      Name: !Ref CrawlerName
       Role: !GetAtt 
         - GlueServiceRole
         - Arn
@@ -921,30 +997,30 @@ Resources:
       GroupId: !Ref VPCEndpointSecurityGroup
       SourceSecurityGroupId: !Ref SageMakerInstanceSecurityGroup
 Outputs:
-  LFDataLakeBucketName:
+  LakeFormationDataLakeBucketName:
     Description: Lake Formation Data Lake Bucket Name
     Value: !Ref DataLakeBucket
-  LFWorkshopBucketName:
-    Description: Lake Formation Workshop Bucket Name
-    Value: !Ref LFWorkshopBucket
+  LakeFormationDemoBucketName:
+    Description: Lake Formation Demo Bucket Name
+    Value: !Ref LakeFormationDemoBucket
   AthenaQueryResultLocation:
     Description: Athena Query Result Location
     Value: !Join 
       - ''
       - - 's3://'
-        - !Ref LFWorkshopBucket
+        - !Ref LakeFormationDemoBucket
         - /athena-results/
   MetadataLocation:
     Description: Metadata Location
     Value: !Join 
       - ''
       - - 's3://'
-        - !Ref LFWorkshopBucket
+        - !Ref LakeFormationDemoBucket
         - /metadata
-  LFUsersCredentials:
-    Description: AWS Secrets Manager Secret Name for all workshop users credentials
-    Value: !Sub >-
-      https://${AWS::Region}.console.aws.amazon.com/secretsmanager/secret?name=${AWS::StackName}-lf-users-credentials
+#  UsersCredentials:
+#    Description: AWS Secrets Manager Secret Name for credentials of all users created by this template
+#    Value: !Sub >-
+#      https://${AWS::Region}.console.aws.amazon.com/secretsmanager/secret?name=${AWS::StackName}-users-credentials
   ADFSUsersCredentials:
     Description: AWS Secrets Manager Secret Name for all ADFS users credentials
     Value: !Sub >-
@@ -969,5 +1045,11 @@ Outputs:
     Value: !Join 
       - ''
       - - 's3://'
-        - !Ref LFWorkshopBucket
+        - !Ref LakeFormationDemoBucket
         - /my-certs.zip
+  GlueRoleName: 
+    Value: !Ref GlueRoleName
+  GlueDataAnalystRoleName: 
+    Value: !Ref GlueDataAnalystRoleName
+  GlueDataEngineerRoleName:
+    Value: !Ref GlueDataEngineerRoleName

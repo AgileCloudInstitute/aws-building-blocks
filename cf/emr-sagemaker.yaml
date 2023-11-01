@@ -3,7 +3,7 @@ Description: >
   Creates RBAC EMR.  Creates a SageMaker Studio Domain and associated user profiles. 
   Creates the Studio Domain in a private VPC and establishes connectivity with EMR via runtime roles 
 Parameters:
-  IdleTimeout:
+  IdleTimeout: 
     Type: Number
     Description: >-
       Terminate EMR cluster automatically after x amount of seconds of
@@ -18,7 +18,7 @@ Parameters:
     Type: 'AWS::EC2::VPC::Id'
     Description: >-
       VPC to be used for Amazon EMR cluster and Amazon SageMaker Studio , please
-      choose LF-Workshop-VPC
+      choose the VPC that was created by the lf-foundation.yaml template and given as output variable.
     AllowedPattern: .+
   PrivateSubnet:
     Type: 'AWS::EC2::Subnet::Id'
@@ -601,8 +601,6 @@ Resources:
       FromPort: 464
       ToPort: 464
       SourceSecurityGroupId: !Ref SageMakerSecurityGroup
-#  S3Bucket:
-#    Type: 'AWS::S3::Bucket'
   allowEMRFSAccessForUser1:
     Type: 'AWS::IAM::Role'
     DependsOn: EMRClusterinstanceProfileRole
@@ -891,7 +889,6 @@ Resources:
       inputBucketName: !Ref LFEMRScienceBucketName
   CleanUpBucketonDeleteLambda:
     DependsOn:
-#      - S3Bucket
       - CleanUpBucketonDeleteLambdaRole
     Type: 'AWS::Lambda::Function'
     Properties:
@@ -1009,21 +1006,6 @@ Resources:
                   - !Sub 'arn:aws:s3:::${LFEMRScienceBucketName}'
                   - !Sub 'arn:aws:s3:::${LFEMRScienceBucketName}/'
                   - !Sub 'arn:aws:s3:::${LFEMRScienceBucketName}/*'
-#                  - !GetAtt 
-#                    - S3Bucket
-#                    - Arn
-#                  - !Join 
-#                    - ''
-#                    - - !GetAtt 
-#                        - S3Bucket
-#                        - Arn
-#                      - /
-#                  - !Join 
-#                    - ''
-#                    - - !GetAtt 
-#                        - S3Bucket
-#                        - Arn
-#                      - /*
               - Effect: Deny
                 Action:
                   - 's3:DeleteBucket'
@@ -1226,9 +1208,6 @@ Resources:
         - LifeCycleConfigLambda
         - Arn
 Outputs:
-#  S3BucketName:
-#    Description: Bucket Name for Amazon S3 bucket
-#    Value: !Ref S3Bucket
   EMRMasterDNSName:
     Description: DNS Name of the EMR Master Node
     Value: !GetAtt 

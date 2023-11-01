@@ -3,6 +3,9 @@ Parameters:
   CFNDatabaseName:
     Type: String
     Default: tpc
+  DataAdminName:
+    Type: String
+    Default: lf-data-admin
 Resources:
  #Add the ALTER permission to the preexisting permissions for the dl_tpc_customer table
   LFTagsPermissionsForTable:
@@ -14,7 +17,7 @@ Resources:
       PermissionsWithGrantOption:  
         - "ALTER" 
       Principal: 
-        DataLakePrincipalIdentifier: "arn:aws:iam::555344254085:user/lf-data-admin"
+        DataLakePrincipalIdentifier: !Sub "arn:aws:iam::${AWS::AccountId}:user/${DataAdminName}"
       Resource: 
         Table:
           CatalogId: !Ref AWS::AccountId
