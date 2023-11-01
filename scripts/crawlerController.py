@@ -78,7 +78,7 @@ def exitFunction(err, process):
   print(logString)
   sys.exit(1)
 
-def startCrawler(cmd):
+def startCrawler(cmd, myName):
   process = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, text=True)
   data = process.stdout
   err = process.stderr
@@ -96,7 +96,9 @@ def startCrawler(cmd):
     logString = "process.returncode is not zero.  Halting program so you can diagnose the root cause of the problem.  "
     print(logString)
     sys.exit
-  getCrawlerStatus('aws glue get-crawler --name "TPC Crawler"')
+  getCmd = 'aws glue get-crawler --name "'+myName+'"'
+  getCrawlerStatus(getCmd)
+#  getCrawlerStatus('aws glue get-crawler --name "TPC Crawler"')
 
 def find(d, tag):
     if tag in d:
@@ -227,7 +229,7 @@ myName = processInputArgs(inputArgs)
 myCmd = 'aws glue start-crawler --name "'+myName+'"' +' --region '+myregion
 print("myCmd is: ", myCmd)
 
-startCrawler(myCmd)
+startCrawler(myCmd, myName)
 
 print("Finished running crawler.  Going to sleep 2 minutes to allow the resource creations ot propagate before continuing on to downstream processes that require them. ")
 time.sleep(120)

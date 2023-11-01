@@ -1,0 +1,71 @@
+Description: >-
+  Amazon EMR cluster with AWS Lake Formation integration with Runtime Role
+Mappings:
+  AWSRegionAMI:
+    us-east-1:
+      HVM64: ami-0c6b1d09930fac512
+    us-east-2:
+      HVM64: ami-02ccb28830b645a41
+    us-west-2:
+      HVM64: ami-04590e7389a6e577c
+    us-west-1:
+      HVM64: ami-03caa3f860895f82e
+    ap-northeast-1:
+      HVM64: ami-011facbea5ec0363b
+Parameters:
+  LakeFormationDemoBucketName:
+    Type: String
+    Description: Name of s3 bucket to be used by user in emr cluster.
+  EMRStepUserPassword: 
+    Type: String
+    Default: Password2!
+    Description: Console password for Emr Step User.
+Resources:
+  EMRStepUser:
+    Type: 'AWS::IAM::User'
+    Properties:
+      Path: /
+      LoginProfile:
+        Password: !Ref EMRStepUserPassword
+        PasswordResetRequired: false
+      Policies:
+        - PolicyName: LF-Athena-Query-Output-Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:Put*'
+                  - 's3:Get*'
+                  - 's3:List*'
+                Resource:
+                  - !Join 
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref LakeFormationDemoBucketName
+                      - /emrlogs*
+                  - !Join 
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref LakeFormationDemoBucketName
+                      - /athena-results/*
+        - PolicyName: LF-EMR-Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'lakeformation:StartQueryPlanning'
+                  - 'lakeformation:GetQueryState'
+                  - 'lakeformation:GetWorkUnits'
+                  - 'lakeformation:GetWorkUnitResults'
+                  - 'elasticmapreduce:*'
+                Resource: '*'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonAthenaFullAccess'
+        - 'arn:aws:iam::aws:policy/AWSCloudShellFullAccess'
+      UserName: emr-step-user
+Outputs:
+  EMRStepUser:
+    Description: EMR Step User
+    Value: !Ref EMRStepUser

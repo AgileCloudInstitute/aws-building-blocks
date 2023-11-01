@@ -3,12 +3,15 @@ Parameters:
   GroupVal3:
     Type: String
     Default: analyst
+  DataAdminName:
+    Type: String
+    Default: lf-data-admin
 Resources:
   TagPermission:
     Type: AWS::LakeFormation::PrincipalPermissions
     Properties: 
-      Principal: 
-          DataLakePrincipalIdentifier: arn:aws:iam::555344254085:user/lf-data-admin
+      Principal:
+        DataLakePrincipalIdentifier: !Sub "arn:aws:iam::${AWS::AccountId}:user/${DataAdminName}"
       Permissions: 
         - ASSOCIATE
         - DESCRIBE

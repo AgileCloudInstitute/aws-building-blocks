@@ -253,7 +253,7 @@ Resources:
             ##############################################################################################
             ### Install acm
             ##############################################################################################
-            $zipName="AgileCloudManager-windows-1.2.zip"
+            $zipName="AgileCloudManager-windows-1.3.zip"
             echo "About to dir initially"
             dir
             $addressForCurl="https://download.agilecloudinstitute.io/"+$zipName
@@ -266,7 +266,7 @@ Resources:
             Expand-Archive $zipName -DestinationPath "staging"
             echo "About to dir staging"
             dir staging
-            $folderName="AgileCloudManager-windows-1.2"
+            $folderName="AgileCloudManager-windows-1.3"
             $sourceFolderName="staging\\*"
             Copy-Item -Path $sourceFolderName -Recurse -Destination $HOME\\acmhome\\ -Verbose
             echo "About to dir $HOME\\acmhome\\ "
