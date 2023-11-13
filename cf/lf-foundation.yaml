@@ -612,7 +612,7 @@ Resources:
         - Arn
       Targets:
         S3Targets:
-          - Path: !Join 
+          - Path: !Join  
               - ''
               - - !Ref DataLakeBucket
                 - /tpcparquet/
