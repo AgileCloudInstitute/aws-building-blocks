@@ -21,6 +21,11 @@ Parameters:
     Type: String
     Default: 10.192.10.0/24
 
+  ImageId: 
+    Description: Retrieves the latest ami id for Windows server 2022
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base'
+
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -101,7 +106,7 @@ Resources:
   MyEC2Instance: 
     Type: AWS::EC2::Instance
     Properties: 
-      ImageId: "ami-0c57d185f41d96f4f"
+      ImageId: !Ref ImageId
       KeyName: !Ref NewKeyPair
       InstanceType: "t2.micro"
       NetworkInterfaces: 
