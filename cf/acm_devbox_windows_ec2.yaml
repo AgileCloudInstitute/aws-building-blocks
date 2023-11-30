@@ -250,6 +250,8 @@ Resources:
             echo "About to show permanent PATH"
             Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name path
             python -m pip install --upgrade pip requests
+            python -m pip uninstall cryptography
+            python -m pip install cryptography
             echo "About to show temporary PATH"
             echo $env:Path
             echo 'About to: aws --version'
