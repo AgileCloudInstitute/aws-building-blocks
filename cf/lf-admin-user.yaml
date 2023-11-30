@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Initial Set up of IAM Roles and Settings.
+
+Parameters:
+  AdminUserName:
+    Type: String
+    Description: IAM user name to be created.
+    Default: DatalakeAdminUser1
+    AllowedPattern: '[\w+=,.@-]+'
+    MinLength: '1'
+    MaxLength: '64'
+    ConstraintDescription: the user name must be between 1 and 64 characters
+  AdminUserPassword:
+    Type: String
+    Description: IAM user console password.
+    Default: replace-with-real-password-from-parameter
+    NoEcho: 'true'
+    AllowedPattern: '[\u0009\u000A\u000D\u0020-\u00FF]+'
+    MinLength: '1'
+    MaxLength: '128'
+    ConstraintDescription: the password must be between 1 and 128 characters
+  KeyName:
+    Type: String
+    Description: Key Pair name to be created.
+    Default: MyKeyPair
+    AllowedPattern: '[\w+=,.@-]+'
+    MinLength: '1'
+    MaxLength: '64'
+    ConstraintDescription: the Key Pair name must be between 1 and 64 characters
+
+Resources:
+  AdminUser:
+    Type: AWS::IAM::User
+    Properties: 
+      LoginProfile:
+        Password: !Ref AdminUserPassword
+      UserName: !Ref AdminUserName
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/PowerUserAccess
+        - arn:aws:iam::aws:policy/IAMFullAccess
+        - arn:aws:iam::aws:policy/AdministratorAccess
+  AdminAccessKey:
+    Type: AWS::IAM::AccessKey
+    DependsOn:
+    - AdminUser
+    Properties: 
+      UserName: !Ref AdminUserName
+  NewKeyPair:
+    Type: 'AWS::EC2::KeyPair'
+    Properties:
+      KeyName: !Ref KeyName
+
+## add DatalakeAdmin as a DL Admin
+#  LFDataLakeSettings:
+#    DependsOn: AdminUser
+#    Type: AWS::LakeFormation::DataLakeSettings
+#    Properties:
+#      Admins:
+#        - DataLakePrincipalIdentifier: !GetAtt 'AdminUser.Arn'
+## With the above steps, set up of Datalake Admin is complete
+
+Outputs:
+  AccessKeyIdAdmin:
+    Description: The AccessKeyID for the admin user.
+    Value: !Ref AdminAccessKey
+
+  SecretAccessKeyAdmin:
+    Description: The SecretAccessKey for the admin user.
+    Value: !GetAtt AdminAccessKey.SecretAccessKey
+
+  MyStacksAccountId:
+    Value: !Ref "AWS::AccountId"
+
+  MyStacksKeyPairId:
+    Value: !GetAtt NewKeyPair.KeyPairId
