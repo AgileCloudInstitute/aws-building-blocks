@@ -13,7 +13,7 @@ Parameters:
   AdminUserPassword:
     Type: String
     Description: IAM user console password.
-    Default: replace-with-real-password-from-parameter
+    Default: replace-With-real-password-from-parameter1
     NoEcho: 'true'
     AllowedPattern: '[\u0009\u000A\u000D\u0020-\u00FF]+'
     MinLength: '1'
