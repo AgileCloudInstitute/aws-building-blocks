@@ -5,7 +5,7 @@ Parameters:
   AdminUserName:
     Type: String
     Description: IAM user name to be created.
-    Default: DatalakeAdministrativeUser1
+    Default: DataLakeAdministrativeUser1
     AllowedPattern: '[\w+=,.@-]+'
     MinLength: '1'
     MaxLength: '64'
