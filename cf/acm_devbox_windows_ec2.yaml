@@ -1,10 +1,9 @@
 Description:  Deploys a Windows EC2 instance within a minimal VPC.  Provides an 
   example for logging into the Windows EC2 instance remotely using an RDP file.  
-  USE IN us-west-2 Oregon REGION ONLY.  YOU MUST CHANGE THE ami-0c57d185f41d96f4f 
-  AMI ID BEFORE TRYING OTHER REGIONS BECAUSE ami-0c57d185f41d96f4f ONLY WORKS IN 
-  us-west-2.  ALSO NOTE THAT t2.micro IS NOT BIG ENOUGH FOR MOST DEVBOX REQUIREMENTS.  
+  This has only been tested in us-west-2 Oregon region.  So get it working in us-west-2 
+  first before trying it in other regions.  ALSO NOTE THAT t2.micro IS NOT BIG ENOUGH FOR MOST DEVBOX REQUIREMENTS.  
   WE ARE ONLY USING t2.micro FOR THE DEMOS BECAUSE t2.micro IS PART OF THE FREE TIER.  
-
+  
 Parameters:
   EnvironmentName:
     Description: An environment name that is prefixed to resource names
