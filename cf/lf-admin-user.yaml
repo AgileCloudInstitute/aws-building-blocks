@@ -39,34 +39,44 @@ Resources:
         - arn:aws:iam::aws:policy/PowerUserAccess
         - arn:aws:iam::aws:policy/IAMFullAccess
         - arn:aws:iam::aws:policy/AdministratorAccess
+
   AdminAccessKey:
     Type: AWS::IAM::AccessKey
     DependsOn:
     - AdminUser
     Properties: 
       UserName: !Ref AdminUserName
+
   NewKeyPair:
     Type: 'AWS::EC2::KeyPair'
     Properties:
       KeyName: !Ref KeyName
 
-## add DatalakeAdmin as a DL Admin
-#  LFDataLakeSettings:
-#    DependsOn: AdminUser
-#    Type: AWS::LakeFormation::DataLakeSettings
-#    Properties:
-#      Admins:
-#        - DataLakePrincipalIdentifier: !GetAtt 'AdminUser.Arn'
-## With the above steps, set up of Datalake Admin is complete
+  AdminAccessKeyID:
+    Type: 'AWS::SecretsManager::Secret'
+    Properties:
+      Description: The AccessKeyID for the admin user.
+      Name: !Sub '${AWS::StackName}-AccessKeyIDAdmin'
+      SecretString: !Ref AdminAccessKey
+
+  AdminSecretAccessKey:
+    Type: 'AWS::SecretsManager::Secret'
+    Properties:
+      Description: The SecretAccessKey for the admin user.
+      Name:  !Sub '${AWS::StackName}-SecretAccessKeyAdmin'
+      SecretString: !GetAtt AdminAccessKey.SecretAccessKey
 
 Outputs:
-  AccessKeyIdAdmin:
-    Description: The AccessKeyID for the admin user.
-    Value: !Ref AdminAccessKey
 
-  SecretAccessKeyAdmin:
-    Description: The SecretAccessKey for the admin user.
-    Value: !GetAtt AdminAccessKey.SecretAccessKey
+  AccessKeyIDAdminLocation:
+    Description: AWS Secrets Manager Secret location for AccessKeyIDAdmin
+    Value: !Sub >-
+      https://${AWS::Region}.console.aws.amazon.com/secretsmanager/secret?name=${AWS::StackName}-AccessKeyIDAdmin
+
+  SecretAccessKeyAdminLocation:
+    Description: AWS Secrets Manager Secret location for SecretAccessKeyAdmin
+    Value: !Sub >-
+      https://${AWS::Region}.console.aws.amazon.com/secretsmanager/secret?name=${AWS::StackName}-SecretAccessKeyAdmin
 
   MyStacksAccountId:
     Value: !Ref "AWS::AccountId"
