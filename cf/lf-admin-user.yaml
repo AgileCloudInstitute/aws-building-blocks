@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Initial Set up of IAM Roles and Settings.
+
+Parameters:
+  AdminUserName:
+    Type: String
+    Description: IAM user name to be created.
+    Default: DataLakeAdministrativeUser1
+    AllowedPattern: '[\w+=,.@-]+'
+    MinLength: '1'
+    MaxLength: '64'
+    ConstraintDescription: the user name must be between 1 and 64 characters
+  AdminUserPassword:
+    Type: String
+    Description: IAM user console password.
+    Default: replace-With-real-password-from-parameter1
+    NoEcho: 'true'
+    AllowedPattern: '[\u0009\u000A\u000D\u0020-\u00FF]+'
+    MinLength: '1'
+    MaxLength: '128'
+    ConstraintDescription: the password must be between 1 and 128 characters
+  KeyName:
+    Type: String
+    Description: Key Pair name to be created.
+    Default: MyKeyPair
+    AllowedPattern: '[\w+=,.@-]+'
+    MinLength: '1'
+    MaxLength: '64'
+    ConstraintDescription: the Key Pair name must be between 1 and 64 characters
+
+Resources:
+  AdminUser:
+    Type: AWS::IAM::User
+    Properties: 
+      LoginProfile:
+        Password: !Ref AdminUserPassword
+      UserName: !Ref AdminUserName
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/PowerUserAccess
+        - arn:aws:iam::aws:policy/IAMFullAccess
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  AdminAccessKey:
+    Type: AWS::IAM::AccessKey
+    DependsOn:
+    - AdminUser
+    Properties: 
+      UserName: !Ref AdminUserName
+
+  NewKeyPair:
+    Type: 'AWS::EC2::KeyPair'
+    Properties:
+      KeyName: !Ref KeyName
+
+  AdminAccessKeyID:
+    Type: 'AWS::SecretsManager::Secret'
+    Properties:
+      Description: The AccessKeyID for the admin user.
+      Name: !Sub '${AWS::StackName}-AccessKeyIDAdmin'
+      SecretString: !Ref AdminAccessKey
+
+  AdminSecretAccessKey:
+    Type: 'AWS::SecretsManager::Secret'
+    Properties:
+      Description: The SecretAccessKey for the admin user.
+      Name:  !Sub '${AWS::StackName}-SecretAccessKeyAdmin'
+      SecretString: !GetAtt AdminAccessKey.SecretAccessKey
+
+Outputs:
+
+  AccessKeyIDAdminLocation:
+    Description: AWS Secrets Manager Secret location for AccessKeyIDAdmin
+    Value: !Sub >-
+      https://${AWS::Region}.console.aws.amazon.com/secretsmanager/secret?name=${AWS::StackName}-AccessKeyIDAdmin
+
+  SecretAccessKeyAdminLocation:
+    Description: AWS Secrets Manager Secret location for SecretAccessKeyAdmin
+    Value: !Sub >-
+      https://${AWS::Region}.console.aws.amazon.com/secretsmanager/secret?name=${AWS::StackName}-SecretAccessKeyAdmin
+
+  MyStacksAccountId:
+    Value: !Ref "AWS::AccountId"
+
+  MyStacksKeyPairId:
+    Value: !GetAtt NewKeyPair.KeyPairId

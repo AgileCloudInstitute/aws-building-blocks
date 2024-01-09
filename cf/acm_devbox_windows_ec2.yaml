@@ -1,10 +1,9 @@
 Description:  Deploys a Windows EC2 instance within a minimal VPC.  Provides an 
   example for logging into the Windows EC2 instance remotely using an RDP file.  
-  USE IN us-west-2 Oregon REGION ONLY.  YOU MUST CHANGE THE ami-06810ab448caa0133 
-  AMI ID BEFORE TRYING OTHER REGIONS BECAUSE ami-06810ab448caa0133 ONLY WORKS IN 
-  us-west-2.  ALSO NOTE THAT t2.micro IS NOT BIG ENOUGH FOR MOST DEVBOX REQUIREMENTS.  
+  This has only been tested in us-west-2 Oregon region.  So get it working in us-west-2 
+  first before trying it in other regions.  ALSO NOTE THAT t2.micro IS NOT BIG ENOUGH FOR MOST DEVBOX REQUIREMENTS.  
   WE ARE ONLY USING t2.micro FOR THE DEMOS BECAUSE t2.micro IS PART OF THE FREE TIER.  
-
+  
 Parameters:
   EnvironmentName:
     Description: An environment name that is prefixed to resource names
@@ -20,6 +19,11 @@ Parameters:
     Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
     Type: String
     Default: 10.192.10.0/24
+
+  ImageId: 
+    Description: Retrieves the latest ami id for Windows server 2022
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base'
 
 Resources:
   VPC:
@@ -101,7 +105,7 @@ Resources:
   MyEC2Instance: 
     Type: AWS::EC2::Instance
     Properties: 
-      ImageId: "ami-06810ab448caa0133"
+      ImageId: !Ref ImageId
       KeyName: !Ref NewKeyPair
       InstanceType: "t2.micro"
       NetworkInterfaces: 
@@ -245,6 +249,8 @@ Resources:
             echo "About to show permanent PATH"
             Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name path
             python -m pip install --upgrade pip requests
+            python -m pip uninstall cryptography
+            python -m pip install cryptography
             echo "About to show temporary PATH"
             echo $env:Path
             echo 'About to: aws --version'
@@ -253,7 +259,7 @@ Resources:
             ##############################################################################################
             ### Install acm
             ##############################################################################################
-            $zipName="AgileCloudManager-windows-1.3.zip"
+            $zipName="AgileCloudManager-windows-1.4.zip"
             echo "About to dir initially"
             dir
             $addressForCurl="https://download.agilecloudinstitute.io/"+$zipName
@@ -266,7 +272,7 @@ Resources:
             Expand-Archive $zipName -DestinationPath "staging"
             echo "About to dir staging"
             dir staging
-            $folderName="AgileCloudManager-windows-1.3"
+            $folderName="AgileCloudManager-windows-1.4"
             $sourceFolderName="staging\\*"
             Copy-Item -Path $sourceFolderName -Recurse -Destination $HOME\\acmhome\\ -Verbose
             echo "About to dir $HOME\\acmhome\\ "
